@@ -1,9 +1,0 @@
-// ############################################################
-
-
-
-void c_main (unsigned int* mboot_ad, unsigned int esp_value)
-{
-	/* startup routine */
-	return;
-}
