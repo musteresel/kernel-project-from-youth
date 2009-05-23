@@ -20,7 +20,6 @@ extern unsigned int find_first_free ();
 extern unsigned int pmm_alloc_frame ();
 extern void pmm_free_frame (unsigned int);
 
-extern void pmm_Setup (unsigned int, unsigned int);
-
 
 #endif //(__KERNEL__PHYS_MEM___HEADER____)
+
