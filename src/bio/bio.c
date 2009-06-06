@@ -34,6 +34,36 @@ void memset8 (unsigned int* ad, unsigned char val, unsigned int count)
 	}
 }
 
+/** function to copy a part of the memory to another part (32bit)**/
+void memcpy32 (unsigned int* target, unsigned int* source, unsigned int count)
+{
+	unsigned int *tmp;
+	unsigned int *tmp2;
+	tmp = target;
+	tmp2 = source;
+	for (; count !=0; count--) {
+		*tmp = *tmp2;
+		tmp++;
+		tmp2++;
+	}
+}
+
+/** function to copy a part of the memory to another part (8bit)**/
+void memcpy8 (unsigned int* target, unsigned int* source, unsigned int count)
+{
+	unsigned char *tmp;
+	unsigned char *tmp2;
+	tmp = (unsigned char*)target;
+	tmp2 = (unsigned char*)source;
+	for (; count !=0; count--) {
+		*tmp = *tmp2;
+		tmp++;
+		tmp2++;
+	}
+}
+
+
+
 
 /** function to write on a system port **/
 void outportb (unsigned short _port, unsigned char _data)

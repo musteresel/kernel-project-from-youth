@@ -7,15 +7,17 @@ This file is part of kernel.
 By Daniel Oertwig
 */
 /////////////////////////////////////////////////////////////////////////
-
-
-
 #include "gdt.h"
+#include "multiboot.h"
 
 
-void c_main (unsigned int* mboot_ad, unsigned int esp_value)
+
+
+
+void c_main (unsigned int eax, unsigned int* ebx, unsigned int esp)
 {
 	/* startup routine */
+	read_mboot_info (eax, ebx);
 	GDT_Setup ( /* TODO where to put the gdt? */ );
 	return;
 }
