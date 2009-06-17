@@ -3,26 +3,29 @@
 #ifndef __KERNEL__ISRIRQ___HEADER____
 #define __KERNEL__ISRIRQ___HEADER____
 
+
+#include "types.h"
+
 /** kernel structures **/
 struct irq_regs
 {
-	unsigned int gs, fs, es, ds;
-	unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-	unsigned int int_no; //no error code
-	unsigned int eip, cs, eflags, useresp, ss;
+	UINT gs, fs, es, ds;
+	UINT edi, esi, ebp, esp, ebx, edx, ecx, eax;
+	UINT int_no; //no error code
+	UINT eip, cs, eflags, useresp, ss;
 };
 struct regs
 {
-	unsigned int gs, fs, es, ds;
-	unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-	unsigned int int_no, err_code;
-	unsigned int eip, cs, eflags, useresp, ss;
+	UINT gs, fs, es, ds;
+	UINT edi, esi, ebp, esp, ebx, edx, ecx, eax;
+	UINT int_no, err_code;
+	UINT eip, cs, eflags, useresp, ss;
 };
 
 extern void ISR_Setup (void);
 
 extern void IRQ_Setup (void);
-extern void IRQ_InstallHandler (int irq, void (*handler)(struct irq_regs *r));
-extern void IRQ_UninstallHandler (int);
+extern void IRQ_InstallHandler (INT irq, void (*handler)(struct irq_regs *r));
+extern void IRQ_UninstallHandler (INT);
 
 #endif //(__KERNEL__ISRIRQ___HEADER____)

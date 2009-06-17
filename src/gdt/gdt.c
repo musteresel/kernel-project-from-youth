@@ -14,56 +14,57 @@ By Daniel Oertwig
 extern void GDT_flush();
 extern void TSS_flush();
 #include "bio.h"
+#include "types.h"
 
 
 /** struct for a pointer to the gdt **/
 struct gdt_ptr
 {
-	unsigned short limit;
-	unsigned int base;
+	UINT16 limit;
+	UINT base;
 } __attribute__((packed));
 
 /** struct for a tss entry **/
 struct tss_entry_struct
 {
-	unsigned int prev_tss;
-	unsigned int esp0;
-	unsigned int ss0;
-	unsigned int esp1;
-	unsigned int ss1;
-	unsigned int esp2;
-	unsigned int ss2;
-	unsigned int cr3;
-	unsigned int eip;
-	unsigned int eflags;
-	unsigned int eax;
-	unsigned int ecx;
-	unsigned int edx;
-	unsigned int ebx;
-	unsigned int esp;
-	unsigned int ebp;
-	unsigned int esi;
-	unsigned int edi;
-	unsigned int es;
-	unsigned int cs;
-	unsigned int ss;
-	unsigned int ds;
-	unsigned int fs;
-	unsigned int gs;
-	unsigned int ldt;
-	unsigned short trap;
-	unsigned short iomap_base;
+	UINT prev_tss;
+	UINT esp0;
+	UINT ss0;
+	UINT esp1;
+	UINT ss1;
+	UINT esp2;
+	UINT ss2;
+	UINT cr3;
+	UINT eip;
+	UINT eflags;
+	UINT eax;
+	UINT ecx;
+	UINT edx;
+	UINT ebx;
+	UINT esp;
+	UINT ebp;
+	UINT esi;
+	UINT edi;
+	UINT es;
+	UINT cs;
+	UINT ss;
+	UINT ds;
+	UINT fs;
+	UINT gs;
+	UINT ldt;
+	UINT16 trap;
+	UINT16 iomap_base;
 } __attribute__((packed));
 
 /** global objects **/
-unsigned int *GDT;
+UINT *GDT;
 struct gdt_ptr pGDT;
 struct tss_entry_struct TSS;
 
 /** function to set a gate in the gdt **/
-void GDT_SetGate (unsigned int num, unsigned int base, unsigned int limit, unsigned char access, unsigned char gran)
+void GDT_SetGate (UINT num, UINT base, UINT limit, UINT8 access, UINT8 gran)
 {
-	unsigned int *tmp;
+	UINT *tmp;
 	
 	tmp = GDT;
 	tmp += num * 2;
@@ -78,12 +79,12 @@ void GDT_SetGate (unsigned int num, unsigned int base, unsigned int limit, unsig
 }
 
 /** function to write the tss and to set the entry in the gdt **/
-void WriteTSS (unsigned int num, unsigned int ss0, unsigned int esp0)
+void WriteTSS (UINT num, UINT ss0, UINT esp0)
 {
-	unsigned int base = (unsigned int)&TSS;
-	unsigned int lim = base + sizeof(struct tss_entry_struct);
+	UINT base = (UINT)&TSS;
+	UINT lim = base + sizeof(struct tss_entry_struct);
 	GDT_SetGate (num,base,lim,0xE9,0x00);
-	memset8 ((unsigned int*)&TSS,0,sizeof(struct tss_entry_struct));
+	memset8 ((UINT*)&TSS,0,sizeof(struct tss_entry_struct));
 	TSS.ss0 = ss0;
 	TSS.esp0 = esp0;
 	TSS.cs = 0x0B;
@@ -92,11 +93,11 @@ void WriteTSS (unsigned int num, unsigned int ss0, unsigned int esp0)
 
 
 /** function to set up the gdt **/
-void GDT_Setup (unsigned int ad)
+void GDT_Setup (UINT ad)
 {
-	unsigned short max_size = 8;
+	UINT16 max_size = 8;
 	
-	GDT = (unsigned int*) ad;
+	GDT = (UINT*) ad;
 	memset32 (GDT, 0, max_size*2);
 	pGDT.limit = (8 * max_size) - 1;
 	pGDT.base = ad;

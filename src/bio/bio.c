@@ -11,13 +11,13 @@ By Daniel Oertwig
 
 
 
-
+#include "types.h"
 
 
 /** function to set a part of the memory to a spezific value (32bit)**/
-void memset32 (unsigned int* ad, unsigned int val, unsigned int count)
+void memset32 (UINT* ad, UINT val, UINT count)
 {
-	unsigned int *tmp;
+	UINT *tmp;
 	tmp = ad;
 	for (; count !=0; count--) {
 		*tmp++ = val;
@@ -25,20 +25,20 @@ void memset32 (unsigned int* ad, unsigned int val, unsigned int count)
 }
 
 /** function to set a part of the memory to a spezific value (8bit)**/
-void memset8 (unsigned int* ad, unsigned char val, unsigned int count)
+void memset8 (UINT* ad, UINT8 val, UINT count)
 {
-	unsigned char *tmp;
-	tmp = (unsigned char*)ad; //TODO correct adress translation?
+	UINT8 *tmp;
+	tmp = (UINT8*)ad; //TODO correct adress translation?
 	for (; count !=0; count--) {
 		*tmp++ = val;
 	}
 }
 
 /** function to copy a part of the memory to another part (32bit)**/
-void memcpy32 (unsigned int* target, unsigned int* source, unsigned int count)
+void memcpy32 (UINT* target, UINT* source, UINT count)
 {
-	unsigned int *tmp;
-	unsigned int *tmp2;
+	UINT *tmp;
+	UINT *tmp2;
 	tmp = target;
 	tmp2 = source;
 	for (; count !=0; count--) {
@@ -49,12 +49,12 @@ void memcpy32 (unsigned int* target, unsigned int* source, unsigned int count)
 }
 
 /** function to copy a part of the memory to another part (8bit)**/
-void memcpy8 (unsigned int* target, unsigned int* source, unsigned int count)
+void memcpy8 (UINT* target, UINT* source, UINT count)
 {
-	unsigned char *tmp;
-	unsigned char *tmp2;
-	tmp = (unsigned char*)target;
-	tmp2 = (unsigned char*)source;
+	UINT8 *tmp;
+	UINT8 *tmp2;
+	tmp = (UINT8*)target;
+	tmp2 = (UINT8*)source;
 	for (; count !=0; count--) {
 		*tmp = *tmp2;
 		tmp++;
@@ -66,15 +66,15 @@ void memcpy8 (unsigned int* target, unsigned int* source, unsigned int count)
 
 
 /** function to write on a system port **/
-void outportb (unsigned short _port, unsigned char _data)
+void outportb (UINT16 _port, UINT8 _data)
 {
 	__asm__ __volatile__ ("outb %1, %0" : : "dN" (_port), "a" (_data));
 }
 
 /** function to read from a system port **/
-unsigned char inportb (unsigned short _port)
+UINT8 inportb (UINT16 _port)
 {
-	unsigned char ret;
+	UINT8 ret;
 	__asm__ __volatile__ ("inb %1, %0" : "=a" (ret) : "dN" (_port));
 	return ret;
 }

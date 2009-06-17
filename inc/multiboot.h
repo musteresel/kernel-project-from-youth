@@ -3,59 +3,76 @@
 #ifndef __KERNEL__MULTIBOOT___HEADER____
 #define __KERNEL__MULTIBOOT___HEADER____
 
+#include "types.h"
+
+
 
 
 /** multiboot structures **/
 typedef struct
 {
-    unsigned int tabsize;
-    unsigned int strsize;
-    unsigned int addr;
-    unsigned int reserved;
+    UINT tabsize;
+    UINT strsize;
+    UINT addr;
+    UINT reserved;
 } aout_symbol_table;
 
 typedef struct
 {
-    unsigned int num;
-    unsigned int size;
-    unsigned int addr;
-    unsigned int shndx;
+    UINT num;
+    UINT size;
+    UINT addr;
+    UINT shndx;
 } elf_section_header_table;
 
 
 
 typedef struct
 {
-    unsigned int flags;
-    unsigned int mem_lower;
-    unsigned int mem_upper;
-    unsigned int boot_device;
-    unsigned int cmdline;
-    unsigned int mods_count;
-    unsigned int mods_addr;
+    UINT flags;
+    UINT mem_lower;
+    UINT mem_upper;
+    UINT boot_device;
+    UINT cmdline;
+    UINT mods_count;
+    UINT mods_addr;
     union
     {
         aout_symbol_table aout_sym;
         elf_section_header_table elf_sec;
     } u;
-    unsigned int mmap_length;
-    unsigned int mmap_addr;
-    unsigned int drives_length;
-    unsigned int drives_addr;
-    unsigned int config_table;
-    unsigned int boot_loader_name;
-    unsigned int apm_table;
+    UINT mmap_length;
+    UINT mmap_addr;
+    UINT drives_length;
+    UINT drives_addr;
+    UINT config_table;
+    UINT boot_loader_name;
+    UINT apm_table;
 //here could be more
 } multiboot_info;
 
 
+
+
+
+typedef struct
+{
+  UINT size;
+  UINT64 base_addr;
+  UINT64 length;
+  UINT type;
+} multiboot_memory_map;
+
+
+
+
+
+
 /**functions to handle multiboot info **/
-extern char read_mboot_info (unsigned int, unsigned int *);
+extern INT8 read_mboot_info (UINT, UINT *);
 
 
-
-
-
+extern UINT mboot_get_memsize_bytes (void);
 
 
 

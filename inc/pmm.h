@@ -3,22 +3,24 @@
 #ifndef __KERNEL__PHYS_MEM___HEADER____
 #define __KERNEL__PHYS_MEM___HEADER____
 
+#include "types.h"
 
+extern UINT ResolveFramefromAddress (UINT);
+extern UINT ResolveAddressfromFrame (UINT);
 
-extern unsigned int ResolveFramefromAddress (unsigned int);
-extern unsigned int ResolveAddressfromFrame (unsigned int);
+extern void free_frame (UINT);
+extern void use_frame (UINT);
 
-extern void free_frame (unsigned int);
-extern void use_frame (unsigned int);
+extern void free_map (UINT);
+extern void use_map (UINT);
+extern void check_map_used (UINT);
 
-extern void free_map (unsigned int);
-extern void use_map (unsigned int);
-extern void check_map_used (unsigned int);
+extern UINT find_first_free ();
 
-extern unsigned int find_first_free ();
+extern UINT pmm_alloc_frame ();
+extern void pmm_free_frame (UINT);
 
-extern unsigned int pmm_alloc_frame ();
-extern void pmm_free_frame (unsigned int);
+extern void use_memrange (UINT, UINT);
 
 
 #endif //(__KERNEL__PHYS_MEM___HEADER____)

@@ -4,7 +4,9 @@
 #define __KERNEL__PHYS_MEM_INIT___HEADER____
 
 
-extern void pmm_Setup (unsigned int, unsigned int);
+#include "types.h"
+
+extern void pmm_Setup (UINT, UINT);
 
 
 #endif //(__KERNEL__PHYS_MEM_INIT___HEADER____)

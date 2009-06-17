@@ -12,25 +12,26 @@ By Daniel Oertwig
 /** extern functions **/
 extern void IDT_load();
 #include "bio.h"
+#include "types.h"
 
 
 /** structure for a pointer to the idt **/
 struct idt_ptr
 {
-	unsigned short limit;
-	unsigned int base;
+	UINT16 limit;
+	UINT base;
 } __attribute__((packed));
 
 
 /** global vars **/
-unsigned int *IDT;
+UINT *IDT;
 struct idt_ptr pIDT;
-const unsigned short numIDTEntries = 256;
+const UINT16 numIDTEntries = 256;
 
 /** function to set a gate in the idt **/
-void IDT_SetGate (unsigned char num, unsigned int base, unsigned short sel, unsigned char flags)
+void IDT_SetGate (UINT8 num, UINT base, UINT16 sel, UINT8 flags)
 {
-	unsigned int *tmp;
+	UINT *tmp;
 	
 	tmp = IDT;
 	tmp += num * 2;
@@ -43,9 +44,9 @@ void IDT_SetGate (unsigned char num, unsigned int base, unsigned short sel, unsi
 }
 
 /** function to set up the idt **/
-void IDT_Setup (unsigned int ad)
+void IDT_Setup (UINT ad)
 {
-	IDT = (unsigned int*)ad;
+	IDT = (UINT*)ad;
 	memset32 (IDT,0,numIDTEntries*2);
 	pIDT.limit = (8*numIDTEntries) - 1;
 	pIDT.base = ad;

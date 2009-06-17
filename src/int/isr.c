@@ -12,6 +12,7 @@ By Daniel Oertwig
 
 #include "idt.h"
 #include "isr_irq.h"
+#include "types.h"
 
 
 
@@ -52,7 +53,7 @@ extern void _isr31();
 
 
 /** human readable strings for each interrupt **/
-char *exception_messages[] =
+INT8 *exception_messages[] =
 {
  "Division By Zero",
  "Debug Exception",

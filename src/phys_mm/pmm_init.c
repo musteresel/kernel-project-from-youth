@@ -12,46 +12,46 @@ By Daniel Oertwig
 #include "pmm.h"
 #include "bio.h"
 
-
+#include "types.h"
 
 
 
 // ############################################################
-extern unsigned int __kernel_space_start;
-extern unsigned int __kernel_space_end;
+extern UINT __kernel_space_start;
+extern UINT __kernel_space_end;
 
 
 
 // ############################################################
 /** memory management **/
-unsigned int pmm_Start;
-const unsigned int pmm_ret_MEMFULL = 0;
-unsigned int pmm_InfoStart;
-unsigned int pmm_InfoEnd;
+UINT pmm_Start;
+const UINT pmm_ret_MEMFULL = 0;
+UINT pmm_InfoStart;
+UINT pmm_InfoEnd;
 
 /** supermap **/
-unsigned int pmm_SMapStart;
-unsigned int pmm_SMapSize;
+UINT pmm_SMapStart;
+UINT pmm_SMapSize;
 
 /** maps **/
-unsigned int pmm_MapsStart;
-unsigned int pmm_CountMaps;
-unsigned int pmm_MapSize;
-const unsigned int pmm_SIZE_OF_MAPS_MB = 8;
-const unsigned int pmm_FRAMES_PER_MAP_DIVISOR = 11; //(NOTE depends on value pmm_SIZE_OF_MAPS)
-const unsigned int pmm_FRAMES_PER_MAP = 8 * 256; //(NOTE depends on value pmm_SIZE_OF_MAPS)
+UINT pmm_MapsStart;
+UINT pmm_CountMaps;
+UINT pmm_MapSize;
+const UINT pmm_SIZE_OF_MAPS_MB = 8;
+const UINT pmm_FRAMES_PER_MAP_DIVISOR = 11; //(NOTE depends on value pmm_SIZE_OF_MAPS)
+const UINT pmm_FRAMES_PER_MAP = 8 * 256; //(NOTE depends on value pmm_SIZE_OF_MAPS)
 
-
+UINT pmm_LastFrame = 0;
 
 
 
 // ############################################################
 /** setting up the phys. memory management **/
-void pmm_Setup (unsigned int base, unsigned int size)
+void pmm_Setup (UINT base, UINT size)
 {
-	unsigned int *wr;
-	unsigned int tmp1;
-	unsigned int tmp2;
+	UINT *wr;
+/*	UINT tmp1;*/
+/*	UINT tmp2;*/
 	
 	pmm_Start = base;
 	pmm_InfoStart = __kernel_space_end + 16;
@@ -59,7 +59,7 @@ void pmm_Setup (unsigned int base, unsigned int size)
 	pmm_MapSize = pmm_FRAMES_PER_MAP >> 5;
 	pmm_SMapSize = (pmm_CountMaps + 31) >> 5;
 	
-	wr = (unsigned int*) pmm_InfoStart;
+	wr = (UINT*) pmm_InfoStart;
 	*wr = pmm_CountMaps;
 	wr++;
 	*wr = size >> 10;
@@ -67,28 +67,46 @@ void pmm_Setup (unsigned int base, unsigned int size)
 	*wr = pmm_SMapSize;
 	wr++;
 	
-	pmm_SMapStart = (unsigned int) wr;
+	pmm_SMapStart = (UINT) wr;
 	wr += pmm_SMapSize;
 	wr++;
-	pmm_MapsStart = (unsigned int) wr;
+	pmm_MapsStart = (UINT) wr;
 	wr += pmm_MapSize * pmm_CountMaps;
 	wr++;
-	pmm_InfoEnd = (unsigned int) wr;
+	pmm_InfoEnd = (UINT) wr;
 	
-	memset32 ((unsigned int*)pmm_SMapStart,0,pmm_InfoEnd-pmm_SMapStart);
+	pmm_LastFrame = ResolveFramefromAdress (base + size);
 	
+	memset32 ((UINT*)pmm_SMapStart,0,pmm_InfoEnd-pmm_SMapStart);
+	
+	/* Not good. Prefer the use of the memorymap provided by grub! *
 	tmp1 = ResolveFramefromAddress ( __kernel_space_start );
 	tmp2 = ResolveFramefromAddress ( pmm_InfoEnd );
 	for (; tmp1 <= tmp2; tmp1++) {
 		use_frame (tmp1);
 // 		NOTE the map ist not checked! TODO (!!!)
-	}
+	}*/
 	
 	__kernel_space_end = pmm_InfoEnd;
 	return;
 }
 
-
+void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
+{
+	multiboot_memory_map *mmap;
+	UINT mmap_end_add = (UINT)mmap_add + mmap_length;
+	
+	for (mmap = (multiboot_memory_map*)mmap_add; (UINT)mmap < mmap_end_add; mmap = ((UINT) mmap + mmap->size + sizeof(mmap->size)) )
+	{
+		if (mmap->base_addr >= 0x100000) { //NOTE: Ignore everything that's not above 1 MB
+			if (mmap->type != 1) {
+				//not free
+				use_memrange ((UINT)mmap->base_addr, (UINT)mmap->length);
+			}
+		}
+	}
+	return;
+}
 
 
 

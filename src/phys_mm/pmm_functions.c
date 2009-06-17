@@ -8,33 +8,34 @@ By Daniel Oertwig
 */
 /////////////////////////////////////////////////////////////////////////
 
+#include "types.h"
 
 
-
-extern unsigned int pmm_MapsStart;//start of maps
-extern unsigned int pmm_MapSize;//size of one map
-extern unsigned int pmm_FRAMES_PER_MAP_DIVISOR;
-extern unsigned int pmm_FRAMES_PER_MAP;
-extern unsigned int pmm_SMapStart;//start of supermap
-extern unsigned int pmm_SMapSize;//Size of supermap
-extern unsigned int pmm_ret_MEMFULL;
-extern unsigned int pmm_Start;//Starting of managed memory
+extern UINT pmm_MapsStart;//start of maps
+extern UINT pmm_MapSize;//size of one map
+extern UINT pmm_FRAMES_PER_MAP_DIVISOR;
+extern UINT pmm_FRAMES_PER_MAP;
+extern UINT pmm_SMapStart;//start of supermap
+extern UINT pmm_SMapSize;//Size of supermap
+extern UINT pmm_ret_MEMFULL;
+extern UINT pmm_Start;//Starting of managed memory
+extern UINT pmm_LastFrame;
 
 
 #define MAKRO_SET_BIT(x) (( 1 << ( (x) )))
 
 /***********************************************************************/
 /***********************************************************************/
-unsigned int ResolveFramefromAddress (unsigned int ad)
+UINT ResolveFramefromAddress (UINT ad)
 {
-    unsigned int frame;
+    UINT frame;
     frame = (ad - pmm_Start);
     frame = frame >> 12;
     return frame;
 }
-unsigned int ResolveAddressfromFrame (unsigned int fr)
+UINT ResolveAddressfromFrame (UINT fr)
 {
-    unsigned int ad;
+    UINT ad;
     ad = fr << 12;
     ad = ad + pmm_Start;
     return ad;
@@ -46,13 +47,13 @@ unsigned int ResolveAddressfromFrame (unsigned int fr)
 *
 * @param frame The number of the frame to be freed.
 */
-void free_frame (unsigned int frame)
+void free_frame (UINT frame)
 {
-    unsigned int map;
-    unsigned int *tmp;
+    UINT map;
+    UINT *tmp;
     map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
     frame = frame - (map * pmm_FRAMES_PER_MAP);
-    tmp = (unsigned int*) (pmm_MapsStart+ (pmm_MapSize*map));
+    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
     tmp += (frame >> 5);
     *tmp &= ~MAKRO_SET_BIT(frame&(31));
 }
@@ -62,13 +63,13 @@ void free_frame (unsigned int frame)
 *
 * @param frame The number of the frame to be used.
 */
-void use_frame (unsigned int frame)
+void use_frame (UINT frame)
 {
-    unsigned int map;
-    unsigned int *tmp;
+    UINT map;
+    UINT *tmp;
     map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
     frame = frame - (map * pmm_FRAMES_PER_MAP);
-    tmp = (unsigned int*) (pmm_MapsStart+ (pmm_MapSize*map));
+    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
     tmp += (frame >> 5);
     *tmp |= MAKRO_SET_BIT(frame&(31));
 }
@@ -81,10 +82,10 @@ void use_frame (unsigned int frame)
 *
 * @param map The number of the map to be freed.
 */
-void free_map (unsigned int map)
+void free_map (UINT map)
 {
-    unsigned int *tmp;
-    tmp = (unsigned int*)pmm_SMapStart;
+    UINT *tmp;
+    tmp = (UINT*)pmm_SMapStart;
     tmp += (map>>5);
     *tmp &= ~MAKRO_SET_BIT(map&(31));
 }
@@ -94,10 +95,10 @@ void free_map (unsigned int map)
 *
 * @param map The number of the map to be used.
 */
-void use_map (unsigned int map)
+void use_map (UINT map)
 {
-    unsigned int *tmp;
-    tmp = (unsigned int*)pmm_SMapStart;
+    UINT *tmp;
+    tmp = (UINT*)pmm_SMapStart;
     tmp += (map>>5);
     *tmp |= MAKRO_SET_BIT(map&(31));
 }
@@ -114,11 +115,11 @@ void use_map (unsigned int map)
 * @param map The number of the map to be checked.
 * @return If 0, then the map is not completely used. If 1, the map is full.
 */
-char check_map_used (unsigned int map)
+char check_map_used (UINT map)
 {
-    unsigned int *tmp;
-    unsigned int i;
-    tmp = (unsigned int*) (pmm_MapsStart+ (pmm_MapSize*map));
+    UINT *tmp;
+    UINT i;
+    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
     i = pmm_MapSize;
     for (; i!=0; i--) {
         if (*tmp!=0xFFFFFFFF) {
@@ -145,13 +146,13 @@ char check_map_used (unsigned int map)
 *
 * @return The function returns the number of the first free frame.
 */
-unsigned int find_first_free ()
+UINT find_first_free ()
 {
-    unsigned int* tmp;
-    unsigned int counta = 0;
-    unsigned int countb = 0;
-    unsigned int countc = 0;
-    tmp = (unsigned int*) pmm_SMapStart;
+    UINT* tmp;
+    UINT counta = 0;
+    UINT countb = 0;
+    UINT countc = 0;
+    tmp = (UINT*) pmm_SMapStart;
     while (*tmp == 0xFFFFFFFF) {
         counta++;
         if (counta>=pmm_SMapSize) return pmm_ret_MEMFULL;
@@ -164,7 +165,7 @@ unsigned int find_first_free ()
     counta <<= 5;// * (2^5) == * 32
     counta += countb;//counta is now the map number
     countb = 0;
-    tmp = (unsigned int*)(pmm_MapsStart+(pmm_MapSize*counta));//pointer on map
+    tmp = (UINT*)(pmm_MapsStart+(pmm_MapSize*counta));//pointer on map
     while (*tmp == 0xFFFFFFFF) {
         countb++;
         if (countb>=pmm_MapSize) return pmm_ret_MEMFULL;
@@ -191,10 +192,10 @@ unsigned int find_first_free ()
 * @return The function returns the frame number or pmm_ret_MEMFULL
 *         if memory is full.
 */
-unsigned int pmm_alloc_frame ()
+UINT pmm_alloc_frame ()
 {
-    unsigned int frame;
-    unsigned int map;
+    UINT frame;
+    UINT map;
     frame = find_first_free();
     if (frame == pmm_ret_MEMFULL) {
         return pmm_ret_MEMFULL;
@@ -212,9 +213,9 @@ unsigned int pmm_alloc_frame ()
 *
 * @param frame The number of the frame to be freed. There is no validation!
 */
-void pmm_free_frame (unsigned int frame)
+void pmm_free_frame (UINT frame)
 {
-    unsigned int map;
+    UINT map;
     map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
     free_frame(frame);
     if (!check_map_used(map)) {
@@ -224,3 +225,43 @@ void pmm_free_frame (unsigned int frame)
 }
 /***********************************************************************/
 /***********************************************************************/
+
+void use_memrange (UINT start, UINT size)
+{
+	UINT startframe;
+	UINT endframe;
+	UINT tmp;
+	
+	if (start < pmm_Start) {
+/*		if (start + size < pmm_Start) {
+			return;
+		} else {
+			size = size - (pmm_Start - start);
+			start = pmm_Start;
+		}*/
+		return;
+	}
+	endframe = ResolveFramefromAdress (start + size);
+	startframe = ResolveFramefromAdress (start); 
+	
+	if (endframe >= pmm_LastFrame) {
+		return;
+	}
+	
+	tmp = endframe - startframe;
+	tmp++; //TODO correct? -> Because endframe AND startframe must be set to used...?
+	for (; tmp > 0; tmp--, startframe++) {
+		use_frame (startframe);
+		map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+		if (check_map_used (map) == 1) {
+			use_map (map);
+		}
+	}
+	
+	return;
+}
+
+
+
+
+

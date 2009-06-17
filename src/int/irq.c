@@ -14,6 +14,7 @@ By Daniel Oertwig
 #include "idt.h"
 #include "bio.h"
 #include "isr_irq.h"
+#include "types.h"
 
 
 
@@ -46,11 +47,11 @@ void *IRQ_Routines[16] =
 };
 
 /** functions to install and uninstall handlers **/
-void IRQ_InstallHandler (int irq, void (*handler)(struct irq_regs *r))
+void IRQ_InstallHandler (INT irq, void (*handler)(struct irq_regs *r))
 {
 	IRQ_Routines[irq] = handler;
 }
-void IRQ_UninstallHandler (int irq)
+void IRQ_UninstallHandler (INT irq)
 {
 	IRQ_Routines[irq] = 0;
 }

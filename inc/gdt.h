@@ -3,9 +3,9 @@
 #ifndef __KERNEL__GDT___HEADER____
 #define __KERNEL__GDT___HEADER____
 
+#include "types.h"
 
-
-extern void GDT_Setup (unsigned int);
+extern void GDT_Setup (UINT);
 
 
 
