@@ -22,11 +22,13 @@ all: allsources kernel
 ## locate (find) all source files in subdirs and include them as var SOURCES
 .PHONY: allsources
 allsources:
+	@echo -n "[allsources] Searching source files..."
 	@echo -n "SOURCES = " > allsources
 	@find . -name "*.c" -printf "%p " >> allsources
 	@echo "\n" >> allsources
 	@echo -n "ASMSRC = " >> allsources
 	@find . -name "*_asm.asm" -printf "%p " >> allsources
+	@echo "  [OK]"
 
 include allsources
 objects = $(patsubst %.c,%.o,$(SOURCES)) $(patsubst %_asm.asm,%_asm.o,$(ASMSRC))
@@ -34,14 +36,20 @@ objects = $(patsubst %.c,%.o,$(SOURCES)) $(patsubst %_asm.asm,%_asm.o,$(ASMSRC))
 ## build and link the kernel
 .PHONY: kernel
 kernel: $(objects)
+	@echo -n "[kernel] Linking object files..."
 	@$(LD) $(LDFLAGS) -o $(OUTPATH)/kernel.bin `find $(OUTPATH) -name "*.o" -printf "%p "`
+	@echo "  [OK]"
 
 
 %.o: %.c
+	@echo -n "[c] Compiling $<..."
 	@$(CC) $(CCFLAGS) $(CINCPATH) $< -o $(OUTPATH)$@
+	@echo "  [OK]"
 
 %_asm.o: %_asm.asm
+	@echo -n "[asm] Assembling $<..."
 	@$(NM) $(NMFLAGS) $< -o $(OUTPATH)$@
+	@echo "  [OK]"
 
 ###########################################################################################################
 
