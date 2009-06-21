@@ -231,6 +231,7 @@ void use_memrange (UINT start, UINT size)
 	UINT startframe;
 	UINT endframe;
 	UINT tmp;
+	UINT map;
 	
 	if (start < pmm_Start) {
 /*		if (start + size < pmm_Start) {
@@ -241,8 +242,8 @@ void use_memrange (UINT start, UINT size)
 		}*/
 		return;
 	}
-	endframe = ResolveFramefromAdress (start + size);
-	startframe = ResolveFramefromAdress (start); 
+	endframe = ResolveFramefromAddress (start + size);
+	startframe = ResolveFramefromAddress (start); 
 	
 	if (endframe >= pmm_LastFrame) {
 		return;
@@ -252,7 +253,7 @@ void use_memrange (UINT start, UINT size)
 	tmp++; //TODO correct? -> Because endframe AND startframe must be set to used...?
 	for (; tmp > 0; tmp--, startframe++) {
 		use_frame (startframe);
-		map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+		map = startframe >> pmm_FRAMES_PER_MAP_DIVISOR;
 		if (check_map_used (map) == 1) {
 			use_map (map);
 		}

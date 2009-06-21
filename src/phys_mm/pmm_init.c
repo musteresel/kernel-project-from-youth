@@ -11,14 +11,15 @@ By Daniel Oertwig
 
 #include "pmm.h"
 #include "bio.h"
+#include "multiboot.h"
 
 #include "types.h"
 
 
 
 // ############################################################
-extern UINT __kernel_space_start;
-extern UINT __kernel_space_end;
+extern UINT __kernel_start;
+extern UINT __kernel_end;
 
 
 
@@ -54,7 +55,7 @@ void pmm_Setup (UINT base, UINT size)
 /*	UINT tmp2;*/
 	
 	pmm_Start = base;
-	pmm_InfoStart = __kernel_space_end + 16;
+	pmm_InfoStart = (UINT)__kernel_end + 16;
 	pmm_CountMaps = size / (pmm_SIZE_OF_MAPS_MB << 20);
 	pmm_MapSize = pmm_FRAMES_PER_MAP >> 5;
 	pmm_SMapSize = (pmm_CountMaps + 31) >> 5;
@@ -75,7 +76,7 @@ void pmm_Setup (UINT base, UINT size)
 	wr++;
 	pmm_InfoEnd = (UINT) wr;
 	
-	pmm_LastFrame = ResolveFramefromAdress (base + size);
+	pmm_LastFrame = ResolveFramefromAddress (base + size);
 	
 	memset32 ((UINT*)pmm_SMapStart,0,pmm_InfoEnd-pmm_SMapStart);
 	
@@ -87,7 +88,7 @@ void pmm_Setup (UINT base, UINT size)
 // 		NOTE the map ist not checked! TODO (!!!)
 	}*/
 	
-	__kernel_space_end = pmm_InfoEnd;
+	__kernel_end = (UINT )pmm_InfoEnd;
 	return;
 }
 
@@ -96,7 +97,8 @@ void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
 	multiboot_memory_map *mmap;
 	UINT mmap_end_add = (UINT)mmap_add + mmap_length;
 	
-	for (mmap = (multiboot_memory_map*)mmap_add; (UINT)mmap < mmap_end_add; mmap = ((UINT) mmap + mmap->size + sizeof(mmap->size)) )
+	for (mmap = (multiboot_memory_map*)mmap_add; (UINT)mmap < mmap_end_add; 
+				mmap = (multiboot_memory_map*)((UINT) mmap + mmap->size + sizeof(mmap->size)) )
 	{
 		if (mmap->base_addr >= 0x100000) { //NOTE: Ignore everything that's not above 1 MB
 			if (mmap->type != 1) {

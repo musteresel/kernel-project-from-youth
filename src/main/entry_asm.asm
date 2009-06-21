@@ -8,14 +8,15 @@ MAGIC	equ 0x1BADB002
 CHECKSUM	equ -(MAGIC + FLAGS)
 
 [SECTION .text]
-[ALIGN 4]
+align 4
 MultibootHeader:
 	dd MAGIC
 	dd FLAGS
 	dd CHECKSUM
 
 kernelentry:
-	lea esp,kstack
+	lea esp,[kstack]
+	;mov esp,[kstack]
 	push esp ;Initial stack
 	push ebx ;Multiboot struct ..?
 	push eax ;Magic Number..?

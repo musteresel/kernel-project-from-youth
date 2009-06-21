@@ -32,6 +32,6 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	pmm_Setup(0x100000,memsize_bytes);
-	GDT_Setup ( /* TODO where to put the gdt? */ );
+	GDT_Setup ( 0x150000 );
 	return;
 }
