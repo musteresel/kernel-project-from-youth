@@ -28,6 +28,5 @@ clean-all: clean
 	@echo "[---------CLEANING vm DIR---------]"
 	@echo -n "[clean-all] Removing logs and boot images..."
 	@rm -rf `find vm/ -name "*.log" -printf "%p "`
-	#@rm -rf `find vm/ -name "*.img" -printf "%p "`
 	@echo "  [OK]"
 	@echo "-------->> DONE"
