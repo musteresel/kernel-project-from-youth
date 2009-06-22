@@ -1,0 +1,7 @@
+default 0
+timeout 10
+color light-blue/black red/black
+
+title The Kernel
+kernel /kernel.bin
+
