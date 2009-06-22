@@ -8,7 +8,7 @@ kernel:
 
 
 kernelimage: kernel
-	@make -C vm/ image
+	sudo make -C vm/ image
 
 
 b-run:
