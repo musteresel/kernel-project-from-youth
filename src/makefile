@@ -14,7 +14,19 @@ OUTPATH = ../build/
 ###########################################################################################################
 ## Default target, do everything
 
-all: allsources kernel
+all: builddirs allsources kernel
+
+
+builddirs:
+	@mkdir -p ../build/bio
+	@mkdir -p ../build/boot
+	@mkdir -p ../build/gdt
+	@mkdir -p ../build/idt
+	@mkdir -p ../build/int
+	@mkdir -p ../build/main
+	@mkdir -p ../build/paging
+	@mkdir -p ../build/phys_mm
+	
 
 
 

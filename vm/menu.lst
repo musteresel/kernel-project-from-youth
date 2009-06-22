@@ -1,5 +1,5 @@
 default 0
-timeout 19
+timeout 25
 color light-blue/black red/black
 
 title The Kernel
