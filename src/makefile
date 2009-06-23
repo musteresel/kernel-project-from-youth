@@ -26,6 +26,7 @@ builddirs:
 	@mkdir -p ../build/main
 	@mkdir -p ../build/paging
 	@mkdir -p ../build/phys_mm
+	@mkdir -p ../build/text
 	
 
 
