@@ -20,29 +20,29 @@ By Daniel Oertwig
 /* startup routine */
 void c_main (UINT eax, UINT* ebx, UINT esp)
 {
-	UINT memsize_bytes = 0;
+	UINT memsize_kbytes = 0;
 	UINT *mmap_add;
 	UINT mmap_length = 0;
 	
 	/* TODO get more detailed info from mboot, such as memory mapping,
 	 * to be able to find a good location for GDT and so on */
 	if (read_mboot_info (eax, ebx) < 0)	{
-		puts("Could not read Multiboot Infor Structure! Am I booted by GRUB?\n");
+		puts("Could not read Multiboot Structure! Am I booted by GRUB?\n");
 		return;
 	}
-	memsize_bytes = mboot_get_memsize_bytes();
-	if (memsize_bytes < 8124)	{ /* NOTE 8124 Bytes = about 8 Megabytes = minimal space required) */
+	memsize_kbytes = mboot_get_memsize_kbytes();
+	if (memsize_kbytes < 8124)	{ /* NOTE 8124 KBytes = about 8 Megabytes = minimal space required) */
 		puts("It seems as if there isn't enough memory!\n");
-		INT8 buf[20];
-		int_to_string(&buf,'d',memsize_bytes);
+		INT8 buf[14];
+		int_to_string((INT8*)&buf,'d',memsize_kbytes);
 		puts(buf);
 		return;
 	}
-	pmm_Setup(0x100000,memsize_bytes);
+	pmm_Setup(0x100000,memsize_kbytes);
 	mmap_add = (UINT*) mboot_get_mmap_add ();
 	mmap_length = mboot_get_mmap_length ();
 	if ( (!mmap_add) || (!mmap_length) ) {
-		/* TODO Print a message */
+		puts("Could not get information about the memorymap from GRUB!\n");
 		return;
 	}
 	pmm_MarkUsedSpace_mmap (mmap_add, mmap_length);

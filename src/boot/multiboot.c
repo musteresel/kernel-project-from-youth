@@ -27,7 +27,7 @@ INT8 read_mboot_info (UINT eax, UINT *ebx)
 	return 0;
 }
 
-UINT mboot_get_memsize_bytes (void)
+UINT mboot_get_memsize_kbytes (void)
 {
 	if (mboot.flags&0x1) {
 		return mboot.mem_upper;

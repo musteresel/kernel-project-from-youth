@@ -72,7 +72,7 @@ typedef struct
 extern INT8 read_mboot_info (UINT, UINT *);
 
 
-extern UINT mboot_get_memsize_bytes (void);
+extern UINT mboot_get_memsize_kbytes (void);
 extern UINT mboot_get_mmap_length (void);
 extern UINT mboot_get_mmap_add (void);
 
