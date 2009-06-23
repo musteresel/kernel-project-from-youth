@@ -35,3 +35,24 @@ UINT mboot_get_memsize_bytes (void)
 		return 0;
 	}
 }
+
+UINT mboot_get_mmap_add (void)
+{
+	if (mboot.flags&64) {
+		return mboot.mmap_addr;
+	} else {
+		return 0;
+	}
+}
+
+UINT mboot_get_mmap_length (void)
+{
+	if (mboot.flags&64) {
+		return mboot.mmap_length;
+	} else {
+		return 0;
+	}
+}
+
+
+
