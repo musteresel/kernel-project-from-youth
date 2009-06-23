@@ -5,6 +5,11 @@ SECTIONS
 {
     . = 0x100000;
     __kernel_start = .;
+    .boot :
+{
+        *(.boot)
+}
+
     .text :
 {
         *(.text)

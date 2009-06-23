@@ -7,7 +7,7 @@ FLAGS	equ 0
 MAGIC	equ 0x1BADB002
 CHECKSUM	equ -(MAGIC + FLAGS)
 
-[SECTION .text]
+[SECTION .boot]
 align 4
 MultibootHeader:
 	dd MAGIC
