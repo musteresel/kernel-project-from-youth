@@ -23,6 +23,8 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	UINT memsize_kbytes = 0;
 	UINT *mmap_add;
 	UINT mmap_length = 0;
+	INT8 numbuf[14];
+	UINT *pointer;
 	
 	/* TODO get more detailed info from mboot, such as memory mapping,
 	 * to be able to find a good location for GDT and so on */
@@ -31,14 +33,13 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	memsize_kbytes = mboot_get_memsize_kbytes();
-	if (memsize_kbytes < 8124)	{ /* NOTE 8124 KBytes = about 8 Megabytes = minimal space required) */
-		puts("It seems as if there isn't enough memory!\n");
-		INT8 buf[14];
-		int_to_string((INT8*)&buf,'d',memsize_kbytes);
-		puts(buf);
+	if (memsize_kbytes < 8124)	{
+		puts("It seems as if there isn't enough memory (about 8MB needed)!\n");
+		int_to_string((INT8*)&numbuf,'d',memsize_kbytes);
+		puts(numbuf);
 		return;
 	}
-	pmm_Setup(0x100000,memsize_kbytes);
+	pmm_Setup(0x100000,memsize_kbytes*1024);
 	mmap_add = (UINT*) mboot_get_mmap_add ();
 	mmap_length = mboot_get_mmap_length ();
 	if ( (!mmap_add) || (!mmap_length) ) {
@@ -46,7 +47,13 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	pmm_MarkUsedSpace_mmap (mmap_add, mmap_length);
-	GDT_Setup ( pmm_alloc_frame () );
+	pointer = pmm_alloc();
+	if ( !pointer )
+	{
+		puts("For some reason there could not be memory allocated for the GDT!\n");
+		return;
+	}
+	GDT_Setup ( (UINT)pointer );
 	puts("\nFertig");
 	return;
 }

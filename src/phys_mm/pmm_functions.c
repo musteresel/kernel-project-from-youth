@@ -138,7 +138,7 @@ char check_map_used (UINT map)
 }
 
 
-
+#include "debug-text.h"
 /***********************************************************************/
 /***********************************************************************/
 /**
@@ -224,6 +224,34 @@ void pmm_free_frame (UINT frame)
     return;
 }
 /***********************************************************************/
+
+
+
+UINT *pmm_alloc ()
+{
+	UINT frame;
+	frame = pmm_alloc_frame();
+	if (frame == pmm_ret_MEMFULL)
+	{
+		return 0;
+	} else
+	{
+		return (UINT*) ResolveAddressfromFrame(frame);
+	}
+}
+
+void pmm_free (UINT* add)
+{
+	UINT frame;
+	if ( (UINT) add < pmm_Start )
+	{
+		return;
+	}
+	frame = ResolveFramefromAddress( (UINT) add);
+	pmm_free_frame (frame);
+}
+
+
 /***********************************************************************/
 
 void use_memrange (UINT start, UINT size)

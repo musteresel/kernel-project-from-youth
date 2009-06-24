@@ -18,8 +18,8 @@ By Daniel Oertwig
 
 
 // ############################################################
-extern UINT __kernel_start;
-extern UINT __kernel_end;
+extern UINT *__kernel_start;
+extern UINT *__kernel_end;
 
 
 
@@ -44,6 +44,9 @@ const UINT pmm_FRAMES_PER_MAP = 8 * 256; //(NOTE depends on value pmm_SIZE_OF_MA
 
 UINT pmm_LastFrame = 0;
 
+UINT pmm_KernelStart;
+UINT pmm_KernelEnd;
+
 
 
 // ############################################################
@@ -53,9 +56,12 @@ void pmm_Setup (UINT base, UINT size)
 	UINT *wr;
 /*	UINT tmp1;*/
 /*	UINT tmp2;*/
+	pmm_KernelStart = (UINT)&__kernel_start;
+	pmm_KernelEnd = (UINT)&__kernel_end;
+
 	
 	pmm_Start = base;
-	pmm_InfoStart = (UINT)__kernel_end + 16;
+	pmm_InfoStart = pmm_KernelEnd + 16;
 	pmm_CountMaps = size / (pmm_SIZE_OF_MAPS_MB << 20);
 	pmm_MapSize = pmm_FRAMES_PER_MAP >> 5;
 	pmm_SMapSize = (pmm_CountMaps + 31) >> 5;
@@ -87,10 +93,14 @@ void pmm_Setup (UINT base, UINT size)
 		use_frame (tmp1);
 // 		NOTE the map ist not checked! TODO (!!!)
 	}*/
+	pmm_KernelEnd = pmm_InfoEnd;
 	
-	__kernel_end = (UINT )pmm_InfoEnd;
+	use_memrange ( pmm_KernelStart, pmm_InfoEnd - pmm_KernelStart );
+	
 	return;
 }
+
+
 
 void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
 {
@@ -103,9 +113,19 @@ void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
 		if (mmap->base_addr >= 0x100000) { //NOTE: Ignore everything that's not above 1 MB
 			if (mmap->type != 1) {
 				//not free
+				/*//DEBUG
+				INT8 buf[14];
+				puts("Found NON free memory: ");
+				int_to_string(buf,'x',mmap->base_addr);
+				puts(buf); puts(" len: ");
+				int_to_string(buf,'x',mmap->length);
+				puts(buf);puts(" type: ");
+				int_to_string(buf,'d',mmap->type);
+				puts(buf);puts("\n");*/
 				use_memrange ((UINT)mmap->base_addr, (UINT)mmap->length);
 			}
 		}
+		/*TODO: mark memory used by the map as used (or copy relevant parts to a save place) */
 	}
 	return;
 }
