@@ -14,6 +14,8 @@ By Daniel Oertwig
 #include "pmm.h"
 #include "types.h"
 #include "debug-text.h"
+#include "isr_irq.h"
+
 
 
 
@@ -64,6 +66,8 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	IDT_Setup ( (UINT)pointer );
+	ISR_Setup ();
+	IRQ_Setup ();
 	puts("\nFertig");
 	return;
 }

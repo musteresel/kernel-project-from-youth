@@ -13,6 +13,7 @@ By Daniel Oertwig
 #include "idt.h"
 #include "isr_irq.h"
 #include "types.h"
+#include "debug-text.h"
 
 
 
@@ -133,6 +134,7 @@ void ISR_Setup (void)
 /** called when an interrupt occured **/
 void ErrorHandler (struct regs *r)
 {
+	puts("Here ErrorHandler! ");
 	__asm__ volatile("hlt"::);
 }
 
