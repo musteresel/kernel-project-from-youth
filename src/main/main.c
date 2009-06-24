@@ -7,6 +7,7 @@ This file is part of kernel.
 By Daniel Oertwig
 */
 /////////////////////////////////////////////////////////////////////////
+#include "idt.h"
 #include "gdt.h"
 #include "multiboot.h"
 #include "pmm_init.h"
@@ -47,6 +48,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	pmm_MarkUsedSpace_mmap (mmap_add, mmap_length);
+	/*TODO: this seems to be a waste of memory... */
 	pointer = pmm_alloc();
 	if ( !pointer )
 	{
@@ -54,6 +56,14 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	GDT_Setup ( (UINT)pointer );
+	/* TODO: critical... is there free mem? AND: pmm_alloc_frames is BAD... */
+	pointer = (UINT*) ResolveAddressfromFrame (pmm_alloc_frames(2));
+	if ( !pointer )
+	{
+		puts("For some reason there could not be memory allocated for the IDT!\n");
+		return;
+	}
+	IDT_Setup ( (UINT)pointer );
 	puts("\nFertig");
 	return;
 }

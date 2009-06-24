@@ -28,17 +28,17 @@ extern UINT pmm_LastFrame;
 /***********************************************************************/
 UINT ResolveFramefromAddress (UINT ad)
 {
-    UINT frame;
-    frame = (ad - pmm_Start);
-    frame = frame >> 12;
-    return frame;
+	UINT frame;
+	frame = (ad - pmm_Start);
+	frame = frame >> 12;
+	return frame;
 }
 UINT ResolveAddressfromFrame (UINT fr)
 {
-    UINT ad;
-    ad = fr << 12;
-    ad = ad + pmm_Start;
-    return ad;
+	UINT ad;
+	ad = fr << 12;
+	ad = ad + pmm_Start;
+	return ad;
 }
 /***********************************************************************/
 /***********************************************************************/
@@ -49,13 +49,13 @@ UINT ResolveAddressfromFrame (UINT fr)
 */
 void free_frame (UINT frame)
 {
-    UINT map;
-    UINT *tmp;
-    map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
-    frame = frame - (map * pmm_FRAMES_PER_MAP);
-    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
-    tmp += (frame >> 5);
-    *tmp &= ~MAKRO_SET_BIT(frame&(31));
+	UINT map;
+	UINT *tmp;
+	map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+	frame = frame - (map * pmm_FRAMES_PER_MAP);
+	tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
+	tmp += (frame >> 5);
+	*tmp &= ~MAKRO_SET_BIT(frame&(31));
 }
 
 /**
@@ -65,15 +65,32 @@ void free_frame (UINT frame)
 */
 void use_frame (UINT frame)
 {
-    UINT map;
-    UINT *tmp;
-    map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
-    frame = frame - (map * pmm_FRAMES_PER_MAP);
-    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
-    tmp += (frame >> 5);
-    *tmp |= MAKRO_SET_BIT(frame&(31));
+	UINT map;
+	UINT *tmp;
+	map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+	frame = frame - (map * pmm_FRAMES_PER_MAP);
+	tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
+	tmp += (frame >> 5);
+	*tmp |= MAKRO_SET_BIT(frame&(31));
 }
 
+
+INT8 check_frame_used (UINT frame)
+{
+	UINT map;
+	UINT *tmp;
+	map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+	frame = frame - (map * pmm_FRAMES_PER_MAP);
+	tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
+	tmp += (frame >> 5);
+	if (*tmp & MAKRO_SET_BIT(frame&(31)) )
+	{
+		return 1;
+	} else
+	{
+		return 0;
+	}
+}
 
 /***********************************************************************/
 /***********************************************************************/
@@ -84,10 +101,10 @@ void use_frame (UINT frame)
 */
 void free_map (UINT map)
 {
-    UINT *tmp;
-    tmp = (UINT*)pmm_SMapStart;
-    tmp += (map>>5);
-    *tmp &= ~MAKRO_SET_BIT(map&(31));
+	UINT *tmp;
+	tmp = (UINT*)pmm_SMapStart;
+	tmp += (map>>5);
+	*tmp &= ~MAKRO_SET_BIT(map&(31));
 }
 
 /**
@@ -97,10 +114,10 @@ void free_map (UINT map)
 */
 void use_map (UINT map)
 {
-    UINT *tmp;
-    tmp = (UINT*)pmm_SMapStart;
-    tmp += (map>>5);
-    *tmp |= MAKRO_SET_BIT(map&(31));
+	UINT *tmp;
+	tmp = (UINT*)pmm_SMapStart;
+	tmp += (map>>5);
+	*tmp |= MAKRO_SET_BIT(map&(31));
 }
 
 
@@ -115,26 +132,26 @@ void use_map (UINT map)
 * @param map The number of the map to be checked.
 * @return If 0, then the map is not completely used. If 1, the map is full.
 */
-char check_map_used (UINT map)
+INT8 check_map_used (UINT map)
 {
-    UINT *tmp;
-    UINT i;
-    tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
-    i = pmm_MapSize;
-    for (; i!=0; i--) {
-        if (*tmp!=0xFFFFFFFF) {
-            return 0;
-        }
-        tmp++;
-    }
-//     i = 0;
-//     for(; i<pmm_MapSize; i++) {
-//         if(*tmp!=0xFFFFFFFF){
-//             return 0;
-//         }
-//         tmp++;
-//     }
-    return 1;
+	UINT *tmp;
+	UINT i;
+	tmp = (UINT*) (pmm_MapsStart+ (pmm_MapSize*map));
+	i = pmm_MapSize;
+	for (; i!=0; i--) {
+		if (*tmp!=0xFFFFFFFF) {
+			return 0;
+		}
+		tmp++;
+	}
+//	 i = 0;
+//	 for(; i<pmm_MapSize; i++) {
+//		 if(*tmp!=0xFFFFFFFF){
+//			 return 0;
+//		 }
+//		 tmp++;
+//	 }
+	return 1;
 }
 
 
@@ -147,38 +164,38 @@ char check_map_used (UINT map)
 */
 UINT find_first_free ()
 {
-    UINT* tmp;
-    UINT counta = 0;
-    UINT countb = 0;
-    UINT countc = 0;
-    tmp = (UINT*) pmm_SMapStart;
-    while (*tmp == 0xFFFFFFFF) {
-        counta++;
-        if (counta>=pmm_SMapSize) return pmm_ret_MEMFULL;
-        tmp++;
-    }
-    while (*tmp & MAKRO_SET_BIT(countb)) {
-        countb++;
-        if (countb>=32) return pmm_ret_MEMFULL;
-    }
-    counta <<= 5;// * (2^5) == * 32
-    counta += countb;//counta is now the map number
-    countb = 0;
-    tmp = (UINT*)(pmm_MapsStart+(pmm_MapSize*counta));//pointer on map
-    while (*tmp == 0xFFFFFFFF) {
-        countb++;
-        if (countb>=pmm_MapSize) return pmm_ret_MEMFULL;
-        tmp++;
-    }
-    while (*tmp & MAKRO_SET_BIT(countc)) {
-        countc++;
-        if (countc>=32) return pmm_ret_MEMFULL;
-    }
-    countb <<= 5;
-    countb += countc;//countb is now the frame number in the map
-    counta <<= pmm_FRAMES_PER_MAP_DIVISOR;
-    counta += countb;//counta is now the global frame number
-    return counta;
+	UINT* tmp;
+	UINT counta = 0;
+	UINT countb = 0;
+	UINT countc = 0;
+	tmp = (UINT*) pmm_SMapStart;
+	while (*tmp == 0xFFFFFFFF) {
+		counta++;
+		if (counta>=pmm_SMapSize) return pmm_ret_MEMFULL;
+		tmp++;
+	}
+	while (*tmp & MAKRO_SET_BIT(countb)) {
+		countb++;
+		if (countb>=32) return pmm_ret_MEMFULL;
+	}
+	counta <<= 5;// * (2^5) == * 32
+	counta += countb;//counta is now the map number
+	countb = 0;
+	tmp = (UINT*)(pmm_MapsStart+(pmm_MapSize*counta));//pointer on map
+	while (*tmp == 0xFFFFFFFF) {
+		countb++;
+		if (countb>=pmm_MapSize) return pmm_ret_MEMFULL;
+		tmp++;
+	}
+	while (*tmp & MAKRO_SET_BIT(countc)) {
+		countc++;
+		if (countc>=32) return pmm_ret_MEMFULL;
+	}
+	countb <<= 5;
+	countb += countc;//countb is now the frame number in the map
+	counta <<= pmm_FRAMES_PER_MAP_DIVISOR;
+	counta += countb;//counta is now the global frame number
+	return counta;
 }
 
 
@@ -189,22 +206,22 @@ UINT find_first_free ()
 * @brief The function allocs a phys. Frame.
 *
 * @return The function returns the frame number or pmm_ret_MEMFULL
-*         if memory is full.
+*		 if memory is full.
 */
 UINT pmm_alloc_frame ()
 {
-    UINT frame;
-    UINT map;
-    frame = find_first_free();
-    if (frame == pmm_ret_MEMFULL) {
-        return pmm_ret_MEMFULL;
-    }
-    use_frame(frame);
-    map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
-    if (check_map_used(map)) {
-        use_map(map);
-    }
-    return frame;
+	UINT frame;
+	UINT map;
+	frame = find_first_free();
+	if (frame == pmm_ret_MEMFULL) {
+		return pmm_ret_MEMFULL;
+	}
+	use_frame(frame);
+	map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+	if (check_map_used(map)) {
+		use_map(map);
+	}
+	return frame;
 }
 
 /**
@@ -214,16 +231,60 @@ UINT pmm_alloc_frame ()
 */
 void pmm_free_frame (UINT frame)
 {
-    UINT map;
-    map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
-    free_frame(frame);
-    if (!check_map_used(map)) {
-        free_map(map);
-    }
-    return;
+	UINT map;
+	map = frame >> pmm_FRAMES_PER_MAP_DIVISOR;
+	free_frame(frame);
+	if (!check_map_used(map)) {
+		free_map(map);
+	}
+	return;
 }
 /***********************************************************************/
 
+/*NOTE This function just tries, if the first memhole is big enough.... TODO */
+UINT pmm_alloc_frames (UINT frames)
+{
+	UINT fframe;
+	UINT tmp;
+	UINT map;
+	INT8 found = 0;
+	if (frames <= 0)
+	{
+		return 0;
+	}
+	tmp = 0;
+	fframe = find_first_free ();
+	if (fframe == pmm_ret_MEMFULL)
+	{
+		return pmm_ret_MEMFULL;
+	}
+	found = 1;
+	for (; tmp < frames; tmp++)
+	{
+		if (check_frame_used(fframe+tmp))
+		{
+			found = 0;
+		}
+	}
+	if (found == 1)
+	{
+		tmp = 0;
+		for (; tmp < frames; tmp++)
+		{
+			use_frame (fframe+tmp);
+			map = (fframe+tmp) >> pmm_FRAMES_PER_MAP_DIVISOR;
+			if (check_map_used (map) == 1) {
+				use_map (map);
+			}
+		}
+		return fframe;
+	} else
+	{
+		return pmm_ret_MEMFULL;
+	}
+}
+
+	
 
 
 UINT *pmm_alloc ()
