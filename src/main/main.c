@@ -39,7 +39,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		puts(numbuf);
 		return;
 	}
-	pmm_Setup(0x100000,memsize_kbytes*1024);
+	pmm_Setup(0x100000,memsize_kbytes<<10);
 	mmap_add = (UINT*) mboot_get_mmap_add ();
 	mmap_length = mboot_get_mmap_length ();
 	if ( (!mmap_add) || (!mmap_length) ) {

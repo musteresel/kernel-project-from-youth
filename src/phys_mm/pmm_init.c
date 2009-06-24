@@ -61,7 +61,7 @@ void pmm_Setup (UINT base, UINT size)
 
 	
 	pmm_Start = base;
-	pmm_InfoStart = pmm_KernelEnd + 16;
+	pmm_InfoStart = (pmm_KernelEnd + 0x1000)&(~0xFFF);
 	pmm_CountMaps = size / (pmm_SIZE_OF_MAPS_MB << 20);
 	pmm_MapSize = pmm_FRAMES_PER_MAP >> 5;
 	pmm_SMapSize = (pmm_CountMaps + 31) >> 5;
@@ -107,10 +107,13 @@ void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
 	multiboot_memory_map *mmap;
 	UINT mmap_end_add = (UINT)mmap_add + mmap_length;
 	
+	/*TODO: only keep some parts of the memory map? */
+	use_memrange ( (UINT) mmap_add, mmap_length);
+	
 	for (mmap = (multiboot_memory_map*)mmap_add; (UINT)mmap < mmap_end_add; 
 				mmap = (multiboot_memory_map*)((UINT) mmap + mmap->size + sizeof(mmap->size)) )
 	{
-		if (mmap->base_addr >= 0x100000) { //NOTE: Ignore everything that's not above 1 MB
+		if (mmap->base_addr >= pmm_Start) { //NOTE: Ignore everything that's not above 1 MB
 			if (mmap->type != 1) {
 				//not free
 				/*//DEBUG
@@ -122,10 +125,9 @@ void pmm_MarkUsedSpace_mmap (UINT *mmap_add, UINT mmap_length)
 				puts(buf);puts(" type: ");
 				int_to_string(buf,'d',mmap->type);
 				puts(buf);puts("\n");*/
-				use_memrange ((UINT)mmap->base_addr, (UINT)mmap->length);
+				use_memrange (mmap->base_addr, mmap->length);
 			}
 		}
-		/*TODO: mark memory used by the map as used (or copy relevant parts to a save place) */
 	}
 	return;
 }
