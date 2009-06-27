@@ -29,6 +29,11 @@ extern void use_memrange (UINT, UINT);
 /* TODO this function is a stub.. */
 extern UINT pmm_alloc_frames (UINT);
 
+/////////////////////////////////////////////////
+
+extern const UINT pmm_ret_MEMFULL;
+extern UINT pmm_KernelStart;
+extern UINT pmm_KernelEnd;
 
 #endif //(__KERNEL__PHYS_MEM___HEADER____)
 

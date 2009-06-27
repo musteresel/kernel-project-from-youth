@@ -15,6 +15,7 @@ By Daniel Oertwig
 #include "types.h"
 #include "debug-text.h"
 #include "isr_irq.h"
+#include "paging.h"
 
 
 
@@ -28,9 +29,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	UINT mmap_length = 0;
 	INT8 numbuf[14];
 	UINT *pointer;
-	
-	/* TODO get more detailed info from mboot, such as memory mapping,
-	 * to be able to find a good location for GDT and so on */
+
 	if (read_mboot_info (eax, ebx) < 0)	{
 		puts("Could not read Multiboot Structure! Am I booted by GRUB?\n");
 		return;
@@ -68,6 +67,8 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	IDT_Setup ( (UINT)pointer );
 	ISR_Setup ();
 	IRQ_Setup ();
+	/* TODO: read out further infos from the multiboot struct (modules etc) */
+	Paging_Init ();
 	puts("\nFertig");
 	return;
 }
