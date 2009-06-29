@@ -5,11 +5,6 @@
 
 #include "types.h"
 
-extern const UINT8 pg_PRESENT;
-extern const UINT8 pg_RW;
-extern const UINT8 pg_USER;
-extern const UINT8 pg_ACCESSED;
-extern const UINT8 pg_DIRTY;
 
 struct ____paging___page
 {

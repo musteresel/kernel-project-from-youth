@@ -12,12 +12,6 @@ By Daniel Oertwig
 #include "paging.h"
 #include "types.h"
 
-const UINT8 pg_PRESENT = 1;
-const UINT8 pg_RW = 2;
-const UINT8 pg_USER = 4;
-const UINT8 pg_ACCESSED = 8;
-const UINT8 pg_DIRTY = 16;
-
 
 /*TODO
 Function that will be needed:
