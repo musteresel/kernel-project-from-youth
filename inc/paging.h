@@ -11,7 +11,7 @@ extern const UINT8 pg_USER;
 extern const UINT8 pg_ACCESSED;
 extern const UINT8 pg_DIRTY;
 
-typedef struct
+struct ____paging___page
 {
 	UINT present : 1;
 	UINT rw : 1;
@@ -20,7 +20,9 @@ typedef struct
 	UINT dirty : 1;
 	UINT unused : 7;
 	UINT frame : 20;
-} pg_Page;
+} __attribute__((packed));
+typedef struct ____paging___page pg_Page;
+
 
 
 typedef struct
@@ -32,9 +34,13 @@ typedef struct
 
 
 
-
 extern void Paging_Init ();
+extern INT8 pg_setEntry(pg_PageTab *, UINT, pg_Page);
+extern pg_Page pg_getEntry(pg_PageTab *, UINT);
 
+extern UINT16 ResolveTabNumfromAddress (UINT);
+extern UINT ResolveAddressfromTabNum (UINT16);
+extern UINT16 ResolvePageNumfromAddress (UINT);
 
 #endif //(__KERNEL__PAGING___HEADER____)
 

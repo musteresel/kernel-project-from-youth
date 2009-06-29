@@ -27,8 +27,8 @@ static void scroll (void)
 	if (cur_y >= 25)
 	{
 		temp = cur_y - 24;
-		memcpy32 ((UINT*)video, (UINT*)((UINT)video + temp*80), (25 - temp)*40);
-		memset32 ((UINT*)((UINT)video + (25 -temp)*80), ( ((0x20 | attribute<<8)<<16) | (0x20 | attribute<<8) ), 40);
+		memcpy32( (UINT*)video, (UINT*)( video + temp * 80),(25 - temp) * 40);
+		memset32 ((UINT*)(video + (25 - temp) * 80), (0x20 | (attribute << 8)), 40);
 		cur_y = 24;
 	}
 }

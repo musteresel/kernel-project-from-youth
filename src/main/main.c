@@ -15,9 +15,7 @@ By Daniel Oertwig
 #include "types.h"
 #include "debug-text.h"
 #include "isr_irq.h"
-
-
-
+#include "paging.h"
 
 
 /* startup routine */
@@ -38,7 +36,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	memsize_kbytes = mboot_get_memsize_kbytes();
 	if (memsize_kbytes < 8124)	{
 		puts("It seems as if there isn't enough memory (about 8MB needed)!\n");
-		int_to_string((INT8*)&numbuf,'d',memsize_kbytes);
+		int_to_string(numbuf,'d',memsize_kbytes);
 		puts(numbuf);
 		return;
 	}
@@ -68,6 +66,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	IDT_Setup ( (UINT)pointer );
 	ISR_Setup ();
 	IRQ_Setup ();
+	Paging_Init ();
 	puts("\nFertig");
 	return;
 }

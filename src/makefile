@@ -3,7 +3,7 @@
 ###########################################################################################################
 ## Vars
 CC = gcc
-CCFLAGS = -m32 -fno-builtin -fno-leading-underscore -fno-strict-aliasing -fno-stack-protector -Wall -c
+CCFLAGS = -m32 -fno-builtin -fno-leading-underscore -fno-strict-aliasing -fno-stack-protector -Wall -c -O3
 NM = nasm
 NMFLAGS = -f elf32
 LD = ld
