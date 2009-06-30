@@ -130,12 +130,46 @@ void ISR_Setup (void)
 }
 
 
+void *ISR_routines[32] =
+{
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0
+};
+
+
+void ISR_InstallHandler (INT isr_num, void (*handler)(struct regs *r))
+{
+	ISR_routines[isr_num] = handler;
+}
+
+void ISR_UninstallHandler (INT isr_num)
+{
+	ISR_routines[isr_num] = 0;
+}
+
 
 /** called when an interrupt occured **/
 void ErrorHandler (struct regs *r)
 {
-	puts("Here ErrorHandler! ");
-	__asm__ volatile("hlt"::);
+	void (*handler) (struct regs *r);
+	handler = ISR_routines[r->int_no];
+	if (handler)
+	{
+		handler(r);
+	} else
+	{
+		INT8 numbuf[15];
+		puts("Error: Could not find ISR routine!\nHalting!\n\n");
+		int_to_string(numbuf,'d',r->int_no);
+		puts("int_no: ");puts(numbuf);
+		int_to_string(numbuf,'d',r->err_code);
+		puts("\nerr_code: ");puts(numbuf);
+		int_to_string(numbuf,'x',r->eip);
+		puts("\neip: 0x");puts(numbuf);
+		asm volatile ("hlt");
+	}
 }
 
 
