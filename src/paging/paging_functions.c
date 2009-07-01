@@ -69,9 +69,7 @@ UINT16 ResolvePageNumfromAddress (UINT add)
 	return ( (add >> 12) & ~(ResolveTabNumfromAddress(add)<<10)  );
 }
 
-
-
-pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
+void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 {
 	UINT16 firstTab;
 	UINT16 firstPage;
@@ -84,19 +82,8 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 	UINT sec_count;
 	UINT sec_count2;
 	
-	pg_PageTab *dir;
 	pg_PageTab *tmptab;
 	pg_Page tmppage;
-	
-	/* allocate space for the dir */
-	tmp = pmm_alloc_frame();
-	if (tmp == pmm_ret_MEMFULL)
-	{
-		puts("Not enough memory to create page directory!\n");
-		asm volatile ("hlt");
-	}
-	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
-	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)/4);
 	
 	/* resolve addresses */
 	firstTab = ResolveTabNumfromAddress (start);
@@ -107,17 +94,22 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 	counter = firstTab;
 	for (; counter <= lastTab; counter++)
 	{
-		tmp = pmm_alloc_frame ();
-		if (tmp == pmm_ret_MEMFULL)
-		{
-			puts("There isn't enough memory to set up Page Tables!\n");
-			asm volatile ("hlt");
+		tmppage = pg_getEntry(dir,counter);
+		if (tmppage.frame == 0) {
+			tmp = pmm_alloc_frame ();
+			if (tmp == pmm_ret_MEMFULL)
+			{
+				puts("There isn't enough memory to set up Page Tables!\n");
+				asm volatile ("hlt");
+			}
+			tmppage.frame = ResolveAddressfromFrame ( tmp) >> 12;
+			tmppage.rw = 0;
+			tmppage.user = 0;
+			tmppage.present = 1;
+			pg_setEntry(dir,counter,tmppage);
+		} else {
+			tmp = ResolveFramefromAddress (tmppage.frame << 12);
 		}
-		tmppage.frame = ResolveAddressfromFrame ( tmp) >> 12;
-		tmppage.rw = 0;
-		tmppage.user = 0;
-		tmppage.present = 1;
-		pg_setEntry(dir,counter,tmppage);
 		tmptab = (pg_PageTab*) ResolveAddressfromFrame (tmp);
 		if (counter==firstTab)
 		{
@@ -133,6 +125,7 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 		}
 		for (; sec_count <= sec_count2; sec_count++)
 		{
+			/* no check needed because we are IDENTITY mapping -> mapping twice isn't that bad */
 			tmppage.rw = 0;
 			tmppage.user = 0;
 			tmppage.present = 1;
@@ -140,7 +133,28 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 			pg_setEntry(tmptab,sec_count,tmppage);
 		}
 	}
+}
 
+
+pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
+{
+	pg_PageTab *dir;
+	pg_Page tmppage;
+	UINT tmp;
+	
+	/* allocate space for the dir */
+	tmp = pmm_alloc_frame();
+	if (tmp == pmm_ret_MEMFULL)
+	{
+		puts("Not enough memory to create page directory!\n");
+		asm volatile ("hlt");
+	}
+	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
+	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)/4);
+	
+	pgoff_IdentityMapMemory (dir,start,end);
+	pgoff_IdentityMapMemory (dir,start,end);
+	
 	/* setting last table to the directory, so that it can be modified without complex mapping (TODO neccessary??) */
 	tmppage.frame = ((UINT)dir) >> 12;
 	tmppage.rw = 0;
@@ -150,7 +164,8 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 	
 	return dir;
 }
-
+	
+	
 
 
 
