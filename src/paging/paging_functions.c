@@ -129,7 +129,7 @@ void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 			tmppage.rw = 0;
 			tmppage.user = 0;
 			tmppage.present = 1;
-			tmppage.frame = ((sec_count*0x1000)+ResolveAddressfromTabNum(counter)) >> 12;
+			tmppage.frame = ((sec_count<<12)+ResolveAddressfromTabNum(counter)) >> 12;
 			pg_setEntry(tmptab,sec_count,tmppage);
 		}
 	}
@@ -150,9 +150,8 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 		asm volatile ("hlt");
 	}
 	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
-	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)/4);
+	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)>>2);
 	
-	pgoff_IdentityMapMemory (dir,start,end);
 	pgoff_IdentityMapMemory (dir,start,end);
 	
 	/* setting last table to the directory, so that it can be modified without complex mapping (TODO neccessary??) */
