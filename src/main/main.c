@@ -64,6 +64,7 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 		return;
 	}
 	IDT_Setup ( (UINT)pointer );
+	pmm_KernelEnd = (UINT)pointer + 0x2000;
 	ISR_Setup ();
 	IRQ_Setup ();
 	Paging_Init ();

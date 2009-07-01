@@ -9,6 +9,9 @@ By Daniel Oertwig
 /////////////////////////////////////////////////////////////////////////
 
 
+#include "bio.h"
+#include "debug-text.h"
+#include "pmm.h"
 #include "paging.h"
 #include "types.h"
 
@@ -68,7 +71,85 @@ UINT16 ResolvePageNumfromAddress (UINT add)
 
 
 
+pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
+{
+	UINT16 firstTab;
+	UINT16 firstPage;
+	
+	UINT16 lastTab;
+	UINT16 lastPage;
+	
+	UINT tmp;
+	UINT counter;
+	UINT sec_count;
+	UINT sec_count2;
+	
+	pg_PageTab *dir;
+	pg_PageTab *tmptab;
+	pg_Page tmppage;
+	
+	/* allocate space for the dir */
+	tmp = pmm_alloc_frame();
+	if (tmp == pmm_ret_MEMFULL)
+	{
+		puts("Not enough memory to create page directory!\n");
+		asm volatile ("hlt");
+	}
+	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
+	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)/4);
+	
+	/* resolve addresses */
+	firstTab = ResolveTabNumfromAddress (start);
+	firstPage = ResolvePageNumfromAddress (start);
+	lastTab = ResolveTabNumfromAddress (end);
+	lastPage = ResolvePageNumfromAddress (end);
+	
+	counter = firstTab;
+	for (; counter <= lastTab; counter++)
+	{
+		tmp = pmm_alloc_frame ();
+		if (tmp == pmm_ret_MEMFULL)
+		{
+			puts("There isn't enough memory to set up Page Tables!\n");
+			asm volatile ("hlt");
+		}
+		tmppage.frame = ResolveAddressfromFrame ( tmp) >> 12;
+		tmppage.rw = 0;
+		tmppage.user = 0;
+		tmppage.present = 1;
+		pg_setEntry(dir,counter,tmppage);
+		tmptab = (pg_PageTab*) ResolveAddressfromFrame (tmp);
+		if (counter==firstTab)
+		{
+			sec_count = firstPage;
+		} else {
+			sec_count = 0;
+		}
+		if (counter==lastTab)
+		{
+			sec_count2 = lastPage;
+		} else {
+			sec_count2 = 1023;
+		}
+		for (; sec_count <= sec_count2; sec_count++)
+		{
+			tmppage.rw = 0;
+			tmppage.user = 0;
+			tmppage.present = 1;
+			tmppage.frame = ((sec_count*0x1000)+ResolveAddressfromTabNum(counter)) >> 12;
+			pg_setEntry(tmptab,sec_count,tmppage);
+		}
+	}
 
+	/* setting last table to the directory, so that it can be modified without complex mapping (TODO neccessary??) */
+	tmppage.frame = ((UINT)dir) >> 12;
+	tmppage.rw = 0;
+	tmppage.user = 0;
+	tmppage.present = 1;
+	pg_setEntry(dir,1023,tmppage);
+	
+	return dir;
+}
 
 
 

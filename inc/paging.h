@@ -37,5 +37,7 @@ extern UINT16 ResolveTabNumfromAddress (UINT);
 extern UINT ResolveAddressfromTabNum (UINT16);
 extern UINT16 ResolvePageNumfromAddress (UINT);
 
+extern pg_PageTab *pgoff_CreateRawIdentityDir (UINT, UINT);
+
 #endif //(__KERNEL__PAGING___HEADER____)
 
