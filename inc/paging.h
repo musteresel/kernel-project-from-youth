@@ -36,6 +36,8 @@ extern pg_Page pg_getEntry(pg_PageTab *, UINT);
 extern UINT16 ResolveTabNumfromAddress (UINT);
 extern UINT ResolveAddressfromTabNum (UINT16);
 extern UINT16 ResolvePageNumfromAddress (UINT);
+extern void EnablePaging (UINT);
+extern UINT DisablePaging ();
 
 extern pg_PageTab *pgoff_CreateRawIdentityDir (UINT, UINT);
 extern void pgoff_IdentityMapMemory(pg_PageTab *, UINT, UINT);

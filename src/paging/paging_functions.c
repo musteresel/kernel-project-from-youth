@@ -29,7 +29,7 @@ TODO*/
 
 
 
-
+/*********** usable at every time ******************/
 INT8 pg_setEntry(pg_PageTab *where, UINT num, pg_Page what)
 {
 	if (where->entries[num].frame == 0)
@@ -53,7 +53,7 @@ pg_Page pg_getEntry(pg_PageTab *where, UINT num)
 	return where->entries[num];
 }
 
-
+/*********** helper functions ******************/
 UINT16 ResolveTabNumfromAddress (UINT add)
 {
 	return ( add >> 22  );
@@ -69,6 +69,28 @@ UINT16 ResolvePageNumfromAddress (UINT add)
 	return ( (add >> 12) & ~(ResolveTabNumfromAddress(add)<<10)  );
 }
 
+void EnablePaging (UINT cr3)
+{
+	UINT cr0 = 0;
+	asm volatile ("mov %0, %%cr3":: "r"(cr3));
+	asm volatile ("mov %%cr0, %0": "=r"(cr0));
+	cr0 |= 0x80000000;
+	asm volatile ("mov %0, %%cr0":: "r"(cr0));
+	return;
+}
+
+UINT DisablePaging ()
+{
+	UINT cr0 = 0;
+	UINT cr3 = 0;
+	asm volatile ("mov %%cr3, %0": "=r"(cr3));
+	asm volatile ("mov %%cr0, %0": "=r"(cr0));
+	cr0 &= ~0x80000000;
+	asm volatile ("mov %0, %%cr0":: "r"(cr0));
+	return cr3;
+}
+
+/*********** useable only when paging is turned off ******************/
 void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 {
 	UINT16 firstTab;
@@ -165,6 +187,6 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 }
 	
 	
-
+/*********** usable only when paging is enabled ******************/
 
 
