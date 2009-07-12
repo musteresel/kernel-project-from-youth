@@ -3,6 +3,8 @@
 [EXTERN ErrorHandler]
 [EXTERN IRQHandler]
 
+[SECTION .klinked]
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;#######################################################################
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -120,7 +122,7 @@ IRQ_preHandler:
 	call eax
 	pop eax
 	RESTORE_ALL_REGS
-	CLEAR_ERR_INT_NUM
+	add esp,4
 	mov al, 0x20
         out 0x20, al
         out 0xA0, al

@@ -39,23 +39,6 @@ extern void _irq15();
 
 
 
-/** dynamic irq routines **/
-void *IRQ_Routines[16] =
-{
- 0, 0, 0, 0, 0, 0, 0, 0,
- 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-/** functions to install and uninstall handlers **/
-void IRQ_InstallHandler (INT irq, void (*handler)(struct irq_regs *r))
-{
-	IRQ_Routines[irq] = handler;
-}
-void IRQ_UninstallHandler (INT irq)
-{
-	IRQ_Routines[irq] = 0;
-}
-
 
 /** function to remap the irqs **/
 void IRQ_Remap (void)
@@ -96,14 +79,15 @@ void IRQ_Setup (void)
 }
 
 
+
+UINT CheckHandlers __attribute__ (( section(".klinked_data"))) = 0;
+
 /** function called when an irq occured, hands over to handler **/
+void IRQHandler (struct irq_regs *r) __attribute__ (( section(".klinked")));
 void IRQHandler (struct irq_regs *r)
 {
-	void (*handler)(struct irq_regs *r);
-	handler = IRQ_Routines[r->int_no - 32];
-	if (handler)
-	{
-		handler(r);
+	if ( CheckHandlers & (1 << (r->int_no-32)) ) {
+		asm volatile ("nop");
 	}
 }
 

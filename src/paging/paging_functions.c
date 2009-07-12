@@ -93,11 +93,19 @@ UINT DisablePaging ()
 /*********** useable only when paging is turned off ******************/
 void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 {
+	pgoff_MapMemory(dir,start,end,start);
+}
+
+
+void pgoff_MapMemory( pg_PageTab *dir, UINT start, UINT end, UINT phys_start)
+{
 	UINT16 firstTab;
 	UINT16 firstPage;
 	
 	UINT16 lastTab;
 	UINT16 lastPage;
+	
+	UINT mapframe;
 	
 	UINT tmp;
 	UINT counter;
@@ -112,6 +120,7 @@ void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 	firstPage = ResolvePageNumfromAddress (start);
 	lastTab = ResolveTabNumfromAddress (end);
 	lastPage = ResolvePageNumfromAddress (end);
+	mapframe = ResolveFramefromAddress (phys_start);
 	
 	counter = firstTab;
 	for (; counter <= lastTab; counter++)
@@ -147,21 +156,20 @@ void pgoff_IdentityMapMemory( pg_PageTab *dir, UINT start, UINT end)
 		}
 		for (; sec_count <= sec_count2; sec_count++)
 		{
-			/* no check needed because we are IDENTITY mapping -> mapping twice isn't that bad */
 			tmppage.rw = 0;
 			tmppage.user = 0;
 			tmppage.present = 1;
-			tmppage.frame = ((sec_count<<12)+ResolveAddressfromTabNum(counter)) >> 12;
+			tmppage.frame = (ResolveAddressfromFrame (mapframe)) >> 12;
+			mapframe++;
 			pg_setEntry(tmptab,sec_count,tmppage);
 		}
 	}
 }
 
 
-pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
+pg_PageTab *pgoff_CreateRawDir ()
 {
 	pg_PageTab *dir;
-	pg_Page tmppage;
 	UINT tmp;
 	
 	/* allocate space for the dir */
@@ -173,16 +181,6 @@ pg_PageTab *pgoff_CreateRawIdentityDir (UINT start, UINT end)
 	}
 	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
 	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)>>2);
-	
-	pgoff_IdentityMapMemory (dir,start,end);
-	
-	/* setting last table to the directory, so that it can be modified without complex mapping (TODO neccessary??) */
-	tmppage.frame = ((UINT)dir) >> 12;
-	tmppage.rw = 0;
-	tmppage.user = 0;
-	tmppage.present = 1;
-	pg_setEntry(dir,1023,tmppage);
-	
 	return dir;
 }
 	

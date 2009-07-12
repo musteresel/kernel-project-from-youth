@@ -39,8 +39,9 @@ extern UINT16 ResolvePageNumfromAddress (UINT);
 extern void EnablePaging (UINT);
 extern UINT DisablePaging ();
 
-extern pg_PageTab *pgoff_CreateRawIdentityDir (UINT, UINT);
+extern pg_PageTab *pgoff_CreateRawDir ();
 extern void pgoff_IdentityMapMemory(pg_PageTab *, UINT, UINT);
+extern void pgoff_MapMemory(pg_PageTab *, UINT, UINT, UINT);
 
 #endif //(__KERNEL__PAGING___HEADER____)
 

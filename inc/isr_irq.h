@@ -23,11 +23,7 @@ struct regs
 };
 
 extern void ISR_Setup (void);
-
 extern void IRQ_Setup (void);
-extern void IRQ_InstallHandler (INT , void (*handler)(struct irq_regs *r));
-extern void IRQ_UninstallHandler (INT);
-extern void ISR_InstallHandler (INT , void (*handler)(struct regs *r));
-extern void ISR_UninstallHandler (INT);
 
 #endif //(__KERNEL__ISRIRQ___HEADER____)
+

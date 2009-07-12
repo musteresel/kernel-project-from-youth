@@ -53,42 +53,6 @@ extern void _isr30();
 extern void _isr31();
 
 
-/** human readable strings for each interrupt **/
-INT8 *exception_messages[] =
-{
- "Division By Zero",
- "Debug Exception",
- "Non Maskable Interrupt Exception",
- "Breakpoint Exception",
- "Into Detected Overflow Exception",
- "Out of Bounds Exception",
- "Invalid Opcode Exception",
- "No Coprocessor Exception",
- "Double Fault Exception",
- "Coprocessor Segment Overrun Exception",
- "Bad TSS Exception",
- "Segment Not Present Exception",
- "Stack Fault Exception",
- "General Protection Fault Exception",
- "Page Fault Exception",
- "Unknown Interrupt Exception",
- "Coprocessor Fault Exception",
- "Alignment Check Exception (486+)",
- "Machine Check Exception (Pentium/586+)",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
- "Reserved Exception",
-};
 
 
 
@@ -130,46 +94,20 @@ void ISR_Setup (void)
 }
 
 
-void *ISR_routines[32] =
-{
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0
-};
-
-
-void ISR_InstallHandler (INT isr_num, void (*handler)(struct regs *r))
-{
-	ISR_routines[isr_num] = handler;
-}
-
-void ISR_UninstallHandler (INT isr_num)
-{
-	ISR_routines[isr_num] = 0;
-}
 
 
 /** called when an interrupt occured **/
+void ErrorHandler (struct regs *r) __attribute__ (( section(".klinked")));
 void ErrorHandler (struct regs *r)
 {
-	void (*handler) (struct regs *r);
-	handler = ISR_routines[r->int_no];
-	if (handler)
-	{
-		handler(r);
-	} else
-	{
-		INT8 numbuf[15];
-		puts("Error: Could not find ISR routine!\nHalting!\n\n");
-		int_to_string(numbuf,'d',r->int_no);
-		puts("int_no: ");puts(numbuf);
-		int_to_string(numbuf,'d',r->err_code);
-		puts("\nerr_code: ");puts(numbuf);
-		int_to_string(numbuf,'x',r->eip);
-		puts("\neip: 0x");puts(numbuf);
-		asm volatile ("hlt");
-	}
+	INT8 numbuf[15];
+	int_to_string(numbuf,'d',r->int_no);
+	puts(numbuf);
+	puts("ISR");
+	int_to_string(numbuf,'x',r->eip);
+	puts(numbuf);
+	asm volatile ("hlt");
+	//TODO call routine to pass a message to the kernel
 }
 
 
