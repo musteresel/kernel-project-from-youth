@@ -187,4 +187,16 @@ pg_PageTab *pgoff_CreateRawDir ()
 	
 /*********** usable only when paging is enabled ******************/
 
+/*pg_PageTab *pgoff_CreateDir ()
+{
+	pg_PageTab *dir;
+	
+	tmp = pmm_alloc_frame();
+	if (tmp == pmm_ret_MEMFULL)
+	{
+		puts("not enough memory to create page directory!\n");
+		return 0;
+	}
+	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
+	copy_*/
 
