@@ -9,10 +9,9 @@
 
 
 extern const UINT KHEAP_start;
-extern const UINT KHEAP_initsize;
+extern const UINT KHEAP_size;
 extern const UINT KHEAP_indexsize;
 extern const UINT KHEAP_MAGIC;
-extern const UINT KHEAP_minsize;
 
 
 typedef struct
@@ -33,17 +32,16 @@ typedef struct
 	OrdArray index;
 	UINT start_address;
 	UINT end_address;
-	UINT max_address;
 	UINT8 supervisor;
 	UINT8 readonly;
 } Heap;
 
 
-Heap *create_heap (UINT, UINT, UINT, UINT, UINT8, UINT8);
-void *alloc(UINT, UINT8, Heap *);
-void free(void *, Heap *); 
+extern INT8 create_heap (Heap *, UINT, UINT, UINT8, UINT8);
+extern void *alloc(UINT, UINT8);
+extern void free(void *); 
 
-
+extern Heap KHeap;
 
 #endif //(__KERNEL__KHEAP___HEADER____)
 

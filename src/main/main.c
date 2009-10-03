@@ -16,6 +16,7 @@ By Daniel Oertwig
 #include "debug-text.h"
 #include "isr_irq.h"
 #include "paging.h"
+#include "kernelheap.h"
 
 
 
@@ -70,5 +71,13 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	IRQ_Setup ();
 	Paging_Init ();
 	puts("\nFertig");
+	UINT *poi = alloc(sizeof(UINT),1);
+	*poi = 4;
+	int_to_string(numbuf,'x',(UINT)poi);
+	puts("\nPoi = ");puts(numbuf);
+	free(poi);
+	poi = alloc(sizeof(UINT),0);
+	int_to_string(numbuf,'x',(UINT)poi);
+	puts("\nPoi = ");puts(numbuf);
 	return;
 }

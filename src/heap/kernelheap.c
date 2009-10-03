@@ -5,10 +5,10 @@
 
 
 const UINT KHEAP_start = 0xB0000000;
-const UINT KHEAP_initsize = 0x100000;
+const UINT KHEAP_size = 0x100000;
 const UINT KHEAP_indexsize = 0x20000;
 const UINT KHEAP_MAGIC = 0x1BADB01B;
-const UINT KHEAP_minsize = 0x70000;
+Heap KHeap;
 
 
 static INT find_smallest_hole(UINT size, UINT8 page_align, Heap *heap)
@@ -53,9 +53,9 @@ static INT8 header_t_less_than(void*a, void *b)
 	return (((HEAP_header*)a)->size < ((HEAP_header*)b)->size)?1:0;
 }
 
-Heap *create_heap(UINT heap_space, UINT start, UINT end_addr, UINT max, UINT8 supervisor, UINT8 readonly)
+
+INT8 create_heap(Heap * heap, UINT start, UINT end_addr, UINT8 supervisor, UINT8 readonly)
 {
-	Heap *heap = (Heap*)heap_space;
 	if ((start&0xFFF) != 0)
 	{
 		return 0;
@@ -73,7 +73,6 @@ Heap *create_heap(UINT heap_space, UINT start, UINT end_addr, UINT max, UINT8 su
 	}
 	heap->start_address = start;
 	heap->end_address = end_addr;
-	heap->max_address = max;
 	heap->supervisor = supervisor;
 	heap->readonly = readonly;
 
@@ -81,111 +80,23 @@ Heap *create_heap(UINT heap_space, UINT start, UINT end_addr, UINT max, UINT8 su
 	hole->size = end_addr-start;
 	hole->magic = KHEAP_MAGIC;
 	hole->is_hole = 1;
-	OA_insert((void*)hole, &heap->index);
-
-	return heap;
-}
-
-
-static void expand(UINT new_size, Heap *heap)
-{
-	if(new_size < (heap->end_address-heap->start_address))
-	{
-		return;
-	}
-	if ((new_size&0xFFFFF000) != 0)
-	{
-		new_size &= 0xFFFFF000;
-		new_size += 0x1000;
-	}
-	if (heap->start_address+new_size > heap->max_address)
-	{
-		return;
-	}
-	/*UINT old_size = heap->end_address-heap->start_address;
-	UINT i = old_size;
-	while (i < new_size)
-	{
-		alloc_frame( get_page(heap->start_address+i, 1, kernel_directory),
-					 (heap->supervisor)?1:0, (heap->readonly)?0:1);
-		i += 0x1000; //TODO!!!
-	}*/
-	heap->end_address = heap->start_address+new_size;
+	OA_insert((void*)hole, &(heap->index));
+	return 1;
 }
 
 
 
-static UINT contract(UINT new_size, Heap *heap)
-{
-	if (new_size > heap->end_address-heap->start_address)
-	{
-		return heap->end_address-heap->start_address;
-	}
-	if (new_size&0x1000)
-	{
-		new_size &= 0x1000;
-		new_size += 0x1000;
-	}
-	if (new_size < KHEAP_minsize)
-	{
-		new_size = KHEAP_minsize;
-	}
-	/*UINT old_size = heap->end_address-heap->start_address;
-	UINT i = old_size - 0x1000;
-	while (new_size < i)
-	{
-		free_frame(get_page(heap->start_address+i, 0, kernel_directory));
-		i -= 0x1000; //TODO!!!!
-	}*/
-	heap->end_address = heap->start_address + new_size;
-	return new_size;
-}
 
 
-void *alloc(UINT size, UINT8 page_align, Heap *heap)
+void *alloc(UINT size, UINT8 page_align)
 {
+	Heap *heap = &KHeap;
 	UINT new_size = size + sizeof(HEAP_header) + sizeof(HEAP_footer);
 	INT iterator = find_smallest_hole (new_size, page_align, heap);
 	
 	if (iterator == -1)
 	{
-		UINT old_length = heap->end_address - heap->start_address;
-		UINT old_end_address = heap->end_address;
-		expand (old_length+new_size, heap);
-		UINT new_length = heap->end_address-heap->start_address;
-		iterator = 0;
-		UINT idx = -1;
-		UINT value = 0x0;
-		while (iterator < heap->index.size)
-		{
-			UINT tmp = (UINT)OA_lookup(iterator, &heap->index);
-			if (tmp > value)
-			{
-				value = tmp;
-				idx = iterator;
-			}
-			iterator++;
-		}
-		if (idx == -1)
-		{
-			HEAP_header *header = (HEAP_header *)old_end_address;
-			header->magic = KHEAP_MAGIC;
-			header->size = new_length - old_length;
-			header->is_hole = 1;
-			HEAP_footer *footer = (HEAP_footer *) (old_end_address + header->size - sizeof(HEAP_footer));
-			footer->magic = KHEAP_MAGIC;
-			footer->header = header;
-			OA_insert ((void*)header, &heap->index);
-		}
-		else
-		{
-			HEAP_header *header = OA_lookup(idx, &heap->index);
-			header->size += new_length - old_length;
-			HEAP_footer *footer = (HEAP_footer *) ( (UINT)header + header->size - sizeof(HEAP_footer) );
-			footer->header = header;
-			footer->magic = KHEAP_MAGIC;
-		}
-		return alloc (size, page_align, heap);
+		return 0;
 	}
 	HEAP_header *orig_hole_header = (HEAP_header *)OA_lookup(iterator, &heap->index);
 	UINT orig_hole_pos = (UINT)orig_hole_header;
@@ -235,6 +146,50 @@ void *alloc(UINT size, UINT8 page_align, Heap *heap)
 	}
 	return (void *) ( (UINT)block_header+sizeof(HEAP_header) );
 }
+
+
+
+
+void free(void *p)
+{
+	if (p == 0) {
+		return;
+	}
+	Heap *heap = &KHeap;
+	HEAP_header *header = (HEAP_header*)( (UINT)p - sizeof(HEAP_header) );
+	HEAP_footer *footer = (HEAP_footer*)( (UINT)header + header->size - sizeof(HEAP_footer) );
+	if ( (header->magic != KHEAP_MAGIC) || (footer->magic != KHEAP_MAGIC)) {
+		return;
+	}
+	header->is_hole = 1;
+	INT8 do_add = 1;
+	HEAP_footer *test_footer = (HEAP_footer*) ( (UINT)header - sizeof(HEAP_footer) );
+	if (test_footer->magic == KHEAP_MAGIC && test_footer->header->is_hole == 1) {
+		UINT cache_size = header->size;
+		header = test_footer->header;
+		footer->header = header;
+		header->size += cache_size;
+		do_add = 0;
+	}
+	HEAP_header *test_header = (HEAP_header*)( (UINT)footer + sizeof(HEAP_footer) );
+	if (test_header->magic == KHEAP_MAGIC && test_header->is_hole == 1) {
+		header->size += test_header->size;
+		test_footer = (HEAP_footer*)( (UINT)test_header + test_header->size - sizeof(HEAP_footer) );
+		footer = test_footer;
+		UINT iterator = 0;
+		while ( (iterator < heap->index.size) && (OA_lookup(iterator,&(heap->index)) != (void*)test_header) ) {
+			iterator++;
+		}
+		if (iterator < heap->index.size) {
+			OA_remove(iterator, &(heap->index));
+		}
+	}
+	if (do_add == 1)
+	OA_insert((void*) header, &(heap->index));
+}
+	
+
+
 
 
 

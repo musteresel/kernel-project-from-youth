@@ -12,6 +12,7 @@ By Daniel Oertwig
 #include "paging.h"
 #include "bio.h"
 #include "pmm.h"
+#include "kernelheap.h"
 
 #include "debug-text.h"
 
@@ -46,8 +47,15 @@ void Paging_Init (void)
 	kdir = pgoff_CreateRawDir();
 	pgoff_MapMemory(kdir,lstart,lend,real_start);
 	pgoff_MapMemory(kdir,0xFFFFC000,0xFFFFFFF0,pointer);
+	pointer = ResolveAddressfromFrame (pmm_alloc_frames(KHEAP_size>>10));
+	if (!pointer) {
+		puts ("Could not allocate space for KHEAP\n");
+		asm volatile ("hlt");
+	}
+	pgoff_MapMemory(kdir,KHEAP_start,KHEAP_start+KHEAP_size,pointer);
 	pgoff_IdentityMapMemory(kdir,0,pmm_KernelEnd);
 	EnablePaging((UINT)kdir);
+	create_heap(&KHeap, KHEAP_start, KHEAP_start+KHEAP_size, 0, 0);
 }
 
 

@@ -4,6 +4,7 @@
 #include "bio.h"
 #include "ord_array.h"
 
+#include "debug-text.h"
 
 
 
@@ -28,7 +29,7 @@ OrdArray OA_place (void *addr, UINT max_size, lessthan_predicate_t less_than)
 {
 	OrdArray OA_ret;
 	OA_ret.array = (OA_VoidPointer*)addr;
-	memset32((UINT*)OA_ret.array, 0, max_size);
+	memset32(addr, 0, max_size);
 	OA_ret.size = 0;
 	OA_ret.max_size = max_size;
 	OA_ret.less_than = less_than;
