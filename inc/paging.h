@@ -26,7 +26,6 @@ typedef struct
 }pg_PageTab;
 
 
-extern const UINT TASK_INFO;
 extern const UINT REMAPPED_PAGEDIR;
 
 

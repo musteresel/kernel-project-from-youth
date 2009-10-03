@@ -12,13 +12,9 @@ typedef struct ___task {
 	UINT cr3;
 	UINT kernelstack;
 	UINT queue;
-	struct ___task *next; /*NOTE: Only usable by scheduler */
+	struct ___task *next;
 } Task;
 
-typedef struct ___ctask {
-	Task *me;
-	Task *next;
-}CTask;
 
 typedef struct __queue {
 	Task *start;

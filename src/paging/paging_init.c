@@ -24,7 +24,6 @@ extern UINT id_end;
 
 pg_PageTab *ldir;
 UINT KPC_startadd;
-const UINT TASK_INFO =   0xFFFF0000;
 const UINT KPC_START =   0xFFFFD000;
 
 void Paging_Init (void)
@@ -59,13 +58,6 @@ void Paging_Init (void)
 		asm volatile ("hlt");
 	}
 	pgoff_MapMemory(kdir,KHEAP_start,KHEAP_start+KHEAP_size,pointer);
-	// Task info
-	pointer = ResolveAddressfromFrame(pmm_alloc_frames(3));
-	if (!pointer) {
-		puts("Could not allocate space for TASK INFO\n");
-		asm volatile ("hlt");
-	}
-	pgoff_MapMemory(kdir,TASK_INFO,TASK_INFO+0x2FF0,pointer);
 	// kernel code
 	pgoff_IdentityMapMemory(kdir,0,pmm_KernelEnd);
 	// the dir itself, used to change mapping later when paging is enabled

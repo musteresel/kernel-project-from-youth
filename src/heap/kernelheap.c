@@ -4,8 +4,8 @@
 #include "ord_array.h"
 
 
-const UINT KHEAP_start = 0xB0000000;
-const UINT KHEAP_size = 0x100000;
+const UINT KHEAP_start = 0xFF400000;
+const UINT KHEAP_size = 0x400000;
 const UINT KHEAP_indexsize = 0x20000;
 const UINT KHEAP_MAGIC = 0x1BADB01B;
 Heap KHeap;
