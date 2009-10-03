@@ -26,7 +26,7 @@ typedef struct
 }pg_PageTab;
 
 
-
+extern const UINT REMAPPED_PAGEDIR;
 
 
 extern void Paging_Init ();
@@ -45,6 +45,9 @@ extern void pgoff_MapMemory(pg_PageTab *, UINT, UINT, UINT);
 
 
 extern void copy_page_physical(UINT, UINT); 
+
+
+extern void MapVirtPhys(UINT, UINT, UINT16);
 
 #endif //(__KERNEL__PAGING___HEADER____)
 

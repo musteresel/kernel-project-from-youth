@@ -102,10 +102,13 @@ void ErrorHandler (struct regs *r)
 {
 	INT8 numbuf[15];
 	int_to_string(numbuf,'d',r->int_no);
+	puts("\n");
 	puts(numbuf);
-	puts("ISR");
+	puts("ISR happen at EIP = ");
 	int_to_string(numbuf,'x',r->eip);
 	puts(numbuf);
+	int_to_string(numbuf,'x',r->esp);
+	puts("\nESP = ");puts(numbuf);
 	asm volatile ("hlt");
 	//TODO call routine to pass a message to the kernel
 }
