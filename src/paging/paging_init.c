@@ -68,7 +68,11 @@ void Paging_Init (void)
 	pgoff_MapMemory(kdir,TASK_INFO,TASK_INFO+0x2FF0,pointer);
 	// kernel code
 	pgoff_IdentityMapMemory(kdir,0,pmm_KernelEnd);
-
+	// the dir itself, used to change mapping later when paging is enabled
+	{
+		kdir->entries[1022].frame = (UINT)kdir >> 12;
+		kdir->entries[1022].present = 1;
+	}
 	EnablePaging((UINT)kdir);
 
 	create_heap(&KHeap, KHEAP_start, KHEAP_start+KHEAP_size, 0, 0);

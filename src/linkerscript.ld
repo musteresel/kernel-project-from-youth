@@ -26,7 +26,7 @@ SECTIONS
 		*(.bss)
 	}
 	id_end = ALIGN(4096);
-	. = 0xFFFF0000;
+	. = 0xFFC00000;
 	linked_start = .;
 	.linked : AT (id_end)
 	{

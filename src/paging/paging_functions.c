@@ -185,7 +185,37 @@ pg_PageTab *pgoff_CreateRawDir ()
 }
 	
 	
-/*********** usable only when paging is enabled ******************/
+/*********** usable only when paging is enabled AND PageDir is remapped in itself ******************/
+
+const UINT REMAPPED_PAGEDIR = 0xFF800000;
+
+void SetPTEntry(UINT PT, UINT16 num, UINT FrameAd, UINT16 Flags)
+{
+    UINT *tmp =(UINT*) ( (REMAPPED_PAGEDIR) | ((PT)<<12) );
+    tmp = tmp + num;
+    *tmp = (FrameAd & 0xFFFFF000) | (Flags & 0xE67);
+}
+UINT GetPTEntry(UINT PT, UINT16 num)
+{
+    UINT *tmp =(UINT*) ( (REMAPPED_PAGEDIR) | ((PT)<<12) );
+    tmp+=num;
+    return (*tmp);
+}
 
 
+inline void invTLB(UINT ad)
+{
+	asm volatile ("invlpg %0"::"m" (*(char *)ad));
+}
+
+void MapVirtPhys(UINT virt, UINT phys, UINT16 flags)
+{
+    UINT pt = ResolveTabNumfromAddress(virt);
+    if (GetPTEntry(1023,pt) == 0) {
+        SetPTEntry(1023,pt, ResolveAddressfromFrame(pmm_alloc_frame()), flags);
+        invTLB(ResolveAddressfromTabNum(pt));
+    }
+    SetPTEntry(pt, ResolvePageNumfromAddress(virt) , phys, flags);
+    invTLB(virt);
+}
 
