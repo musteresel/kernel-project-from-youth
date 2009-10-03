@@ -16,6 +16,8 @@ By Daniel Oertwig
 #include "debug-text.h"
 #include "isr_irq.h"
 #include "paging.h"
+#include "kernelheap.h"
+#include "multitasking.h"
 
 
 
@@ -69,6 +71,9 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	ISR_Setup ();
 	IRQ_Setup ();
 	Paging_Init ();
+	Multitasking_Init ();
+	asm volatile ("sti");
 	puts("\nFertig");
+	for(;;);
 	return;
 }

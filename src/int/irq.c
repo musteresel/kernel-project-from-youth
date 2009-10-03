@@ -15,6 +15,7 @@ By Daniel Oertwig
 #include "bio.h"
 #include "isr_irq.h"
 #include "types.h"
+#include "multitasking.h"
 
 
 
@@ -82,12 +83,20 @@ void IRQ_Setup (void)
 
 UINT CheckHandlers __attribute__ (( section(".klinked_data"))) = 0;
 
+
+
 /** function called when an irq occured, hands over to handler **/
-void IRQHandler (struct irq_regs *r) __attribute__ (( section(".klinked")));
-void IRQHandler (struct irq_regs *r)
+UINT IRQHandler (UINT esp) __attribute__ (( section(".klinked")));
+UINT IRQHandler (UINT esp)
 {
-	if ( CheckHandlers & (1 << (r->int_no-32)) ) {
-		asm volatile ("nop");
+	struct irq_regs *r = (struct irq_regs*)esp;
+	if (r->int_no == 32) {
+		return SwitchTask(r);
 	}
+/*	if ( CheckHandlers & (1 << (r->int_no-32)) ) {*/
+/*		asm volatile ("nop");*/
+/*		return esp;*/
+/*	}*/
+	return esp;
 }
 

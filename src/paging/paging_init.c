@@ -12,6 +12,7 @@ By Daniel Oertwig
 #include "paging.h"
 #include "bio.h"
 #include "pmm.h"
+#include "kernelheap.h"
 
 #include "debug-text.h"
 
@@ -22,6 +23,8 @@ extern UINT id_end;
 
 
 pg_PageTab *ldir;
+UINT KPC_startadd;
+
 
 void Paging_Init (void)
 {
@@ -30,12 +33,29 @@ void Paging_Init (void)
 	UINT lend = (UINT)&linked_end;
 	UINT real_start = (UINT)&id_end;
 	
-	kdir = pgoff_CreateRawDir();
+	UINT pointer = ResolveAddressfromFrame (pmm_alloc_frames(4));
+	if (!pointer) {
+		puts ("Could not allocate space for KPC\n");
+		asm volatile ("hlt");
+	}
+	KPC_startadd = pointer;
+	
 	ldir = pgoff_CreateRawDir();
 	pgoff_MapMemory(ldir,lstart,lend,real_start);
+	pgoff_MapMemory(ldir,0xFFFFC000,0xFFFFFFF0,pointer);
+	
+	kdir = pgoff_CreateRawDir();
 	pgoff_MapMemory(kdir,lstart,lend,real_start);
+	pgoff_MapMemory(kdir,0xFFFFC000,0xFFFFFFF0,pointer);
+	pointer = ResolveAddressfromFrame (pmm_alloc_frames(KHEAP_size>>10));
+	if (!pointer) {
+		puts ("Could not allocate space for KHEAP\n");
+		asm volatile ("hlt");
+	}
+	pgoff_MapMemory(kdir,KHEAP_start,KHEAP_start+KHEAP_size,pointer);
 	pgoff_IdentityMapMemory(kdir,0,pmm_KernelEnd);
 	EnablePaging((UINT)kdir);
+	create_heap(&KHeap, KHEAP_start, KHEAP_start+KHEAP_size, 0, 0);
 }
 
 
