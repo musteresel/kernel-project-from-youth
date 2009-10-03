@@ -15,6 +15,7 @@ extern void GDT_flush();
 extern void TSS_flush();
 #include "bio.h"
 #include "types.h"
+#include "gdt.h"
 
 
 /** struct for a pointer to the gdt **/
@@ -24,37 +25,7 @@ struct gdt_ptr
 	UINT base;
 } __attribute__((packed));
 
-/** struct for a tss entry **/
-struct tss_entry_struct
-{
-	UINT prev_tss;
-	UINT esp0;
-	UINT ss0;
-	UINT esp1;
-	UINT ss1;
-	UINT esp2;
-	UINT ss2;
-	UINT cr3;
-	UINT eip;
-	UINT eflags;
-	UINT eax;
-	UINT ecx;
-	UINT edx;
-	UINT ebx;
-	UINT esp;
-	UINT ebp;
-	UINT esi;
-	UINT edi;
-	UINT es;
-	UINT cs;
-	UINT ss;
-	UINT ds;
-	UINT fs;
-	UINT gs;
-	UINT ldt;
-	UINT16 trap;
-	UINT16 iomap_base;
-} __attribute__((packed));
+
 
 /** global objects **/
 UINT *GDT;

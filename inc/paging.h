@@ -26,7 +26,7 @@ typedef struct
 }pg_PageTab;
 
 
-
+extern const UINT TASK_INFO;
 
 
 extern void Paging_Init ();
