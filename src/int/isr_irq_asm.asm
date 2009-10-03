@@ -116,11 +116,9 @@ ISR_NO_ERR 31
 IRQ_preHandler:
 	SAVE_ALL_REGS
 	SET_KERNELCONTEXT
-	mov eax, esp
-	push eax
-	mov eax, IRQHandler
-	call eax
-	pop eax
+	push esp
+	call IRQHandler
+	mov esp, eax
 	RESTORE_ALL_REGS
 	add esp,4
 	mov al, 0x20

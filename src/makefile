@@ -28,6 +28,7 @@ builddirs:
 	@mkdir -p ../build/phys_mm
 	@mkdir -p ../build/text
 	@mkdir -p ../build/heap
+	@mkdir -p ../build/multitasking
 	
 
 

@@ -17,6 +17,7 @@ By Daniel Oertwig
 #include "isr_irq.h"
 #include "paging.h"
 #include "kernelheap.h"
+#include "multitasking.h"
 
 
 
@@ -70,14 +71,9 @@ void c_main (UINT eax, UINT* ebx, UINT esp)
 	ISR_Setup ();
 	IRQ_Setup ();
 	Paging_Init ();
+	Multitasking_Init ();
+	asm volatile ("sti");
 	puts("\nFertig");
-	UINT *poi = alloc(sizeof(UINT),1);
-	*poi = 4;
-	int_to_string(numbuf,'x',(UINT)poi);
-	puts("\nPoi = ");puts(numbuf);
-	free(poi);
-	poi = alloc(sizeof(UINT),0);
-	int_to_string(numbuf,'x',(UINT)poi);
-	puts("\nPoi = ");puts(numbuf);
+	for(;;);
 	return;
 }

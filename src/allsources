@@ -1,3 +1,3 @@
-SOURCES = ./boot/multiboot.c ./paging/paging_functions.c ./paging/paging_init.c ./main/main.c ./idt/idt.c ./int/irq.c ./int/isr.c ./bio/bio.c ./gdt/gdt.c ./phys_mm/pmm_init.c ./phys_mm/pmm_functions.c ./heap/kernelheap.c ./heap/ord_array.c ./text/debug-text.c 
+SOURCES = ./boot/multiboot.c ./paging/paging_functions.c ./paging/paging_init.c ./main/main.c ./idt/idt.c ./multitasking/multitasking.c ./int/irq.c ./int/isr.c ./bio/bio.c ./gdt/gdt.c ./phys_mm/pmm_init.c ./phys_mm/pmm_functions.c ./heap/kernelheap.c ./heap/ord_array.c ./text/debug-text.c 
 
 ASMSRC = ./paging/paging_functions_asm.asm ./main/entry_asm.asm ./idt/idt_asm.asm ./int/isr_irq_asm.asm ./gdt/gdt_asm.asm 

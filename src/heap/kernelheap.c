@@ -87,10 +87,13 @@ INT8 create_heap(Heap * heap, UINT start, UINT end_addr, UINT8 supervisor, UINT8
 
 
 
-
-void *alloc(UINT size, UINT8 page_align)
+void *kalloc(UINT size, UINT8 page_align)
 {
-	Heap *heap = &KHeap;
+	return alloc(size,page_align,&KHeap);
+}
+
+void *alloc(UINT size, UINT8 page_align, Heap *heap)
+{
 	UINT new_size = size + sizeof(HEAP_header) + sizeof(HEAP_footer);
 	INT iterator = find_smallest_hole (new_size, page_align, heap);
 	
@@ -148,14 +151,16 @@ void *alloc(UINT size, UINT8 page_align)
 }
 
 
+void kfree(void *p)
+{
+	free(p,&KHeap);
+}
 
-
-void free(void *p)
+void free(void *p, Heap *heap)
 {
 	if (p == 0) {
 		return;
 	}
-	Heap *heap = &KHeap;
 	HEAP_header *header = (HEAP_header*)( (UINT)p - sizeof(HEAP_header) );
 	HEAP_footer *footer = (HEAP_footer*)( (UINT)header + header->size - sizeof(HEAP_footer) );
 	if ( (header->magic != KHEAP_MAGIC) || (footer->magic != KHEAP_MAGIC)) {

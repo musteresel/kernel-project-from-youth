@@ -8,15 +8,15 @@ bochs: floppy.img
 	@echo "  [OK]"
 
 image: mnt/ floppy.img ../build/kernel.bin menu.lst
-	@echo "[image] Mounting floppy.img..."
-	sudo mount -o loop floppy.img mnt/
+	@echo -n "[image] Mounting floppy.img..."
+	@sudo mount -o loop floppy.img mnt/
 	@echo "  [OK]"
 	@echo -n "[image] Copying files to image..."
 	@cp ../build/kernel.bin mnt/kernel.bin
 	@cp menu.lst mnt/grub/menu.lst
 	@echo "  [OK]"
-	@echo "[image] Unmounting floppy.img..."
-	sudo umount mnt/
+	@echo -n "[image] Unmounting floppy.img..."
+	@sudo umount mnt/
 	@echo "  [OK]"
 
 mnt/:
@@ -26,15 +26,15 @@ mnt/:
 
 
 floppy.img: mnt/
-	@echo "[floppy.img]Generating floppy.img..."
+	@echo -n "[floppy.img]Generating floppy.img..."
 	@dd if=/dev/zero of=floppy.img bs=1024 count=1440
 	@mke2fs -q -F floppy.img
-	sudo mount -o loop floppy.img mnt/
+	@sudo mount -o loop floppy.img mnt/
 	@mkdir -p mnt/grub
 	@cp /boot/grub/stage1 mnt/grub/
 	@cp /boot/grub/stage2 mnt/grub/
 	@cp menu.lst mnt/grub/
-	sudo umount mnt/
+	@sudo umount mnt/
 	@echo "device (fd0) floppy.img\nroot (fd0)\nsetup (fd0)\nquit\n" | /usr/sbin/grub
 	@echo "  [OK]"
 	

@@ -38,8 +38,10 @@ typedef struct
 
 
 extern INT8 create_heap (Heap *, UINT, UINT, UINT8, UINT8);
-extern void *alloc(UINT, UINT8);
-extern void free(void *); 
+extern void *alloc(UINT, UINT8, Heap*);
+extern void *kalloc(UINT, UINT8);
+extern void free(void *, Heap*); 
+extern void kfree(void *);
 
 extern Heap KHeap;
 
