@@ -16,18 +16,6 @@ By Daniel Oertwig
 #include "types.h"
 
 
-/*TODO
-Function that will be needed:
-
-* Functions to create and delete PageDirectories
-* Functions to create and delete PageTables (used by above)
-* Functions to physically copy a frame
-* Functions to link a frame (but also to unlink a frame)
-
-
-TODO*/
-
-
 
 /*********** usable at every time ******************/
 INT8 pg_setEntry(pg_PageTab *where, UINT num, pg_Page what)
@@ -128,11 +116,7 @@ void pgoff_MapMemory( pg_PageTab *dir, UINT start, UINT end, UINT phys_start)
 		tmppage = pg_getEntry(dir,counter);
 		if (tmppage.frame == 0) {
 			tmp = pmm_alloc_frame ();
-			if (tmp == pmm_ret_MEMFULL)
-			{
-				puts("There isn't enough memory to set up Page Tables!\n");
-				asm volatile ("hlt");
-			}
+			CheckForSure((tmp != pmm_ret_MEMFULL),"Not enough memory to set up page tables!");
 			tmppage.frame = ResolveAddressfromFrame ( tmp) >> 12;
 			tmppage.rw = 0;
 			tmppage.user = 0;
@@ -171,14 +155,9 @@ pg_PageTab *pgoff_CreateRawDir ()
 {
 	pg_PageTab *dir;
 	UINT tmp;
-	
-	/* allocate space for the dir */
+
 	tmp = pmm_alloc_frame();
-	if (tmp == pmm_ret_MEMFULL)
-	{
-		puts("Not enough memory to create page directory!\n");
-		asm volatile ("hlt");
-	}
+	CheckForSure((tmp != pmm_ret_MEMFULL),"Not enough memory to create page directory!");
 	dir = (pg_PageTab *)ResolveAddressfromFrame (tmp);
 	memset32 ( (UINT*)dir, 0, sizeof(pg_PageTab)>>2);
 	return dir;
@@ -187,17 +166,18 @@ pg_PageTab *pgoff_CreateRawDir ()
 	
 /*********** usable only when paging is enabled AND PageDir is remapped in itself ******************/
 
-const UINT REMAPPED_PAGEDIR = 0xFF800000;
+const UINT pg_PAGEDIR = 0xFF800000;
+const UINT16 pg_PAGEDIRNUM = 1022;
 
 void SetPTEntry(UINT PT, UINT16 num, UINT FrameAd, UINT16 Flags)
 {
-    UINT *tmp =(UINT*) ( (REMAPPED_PAGEDIR) | ((PT)<<12) );
+    UINT *tmp =(UINT*) ( (pg_PAGEDIR) | ((PT)<<12) );
     tmp = tmp + num;
     *tmp = (FrameAd & 0xFFFFF000) | (Flags & 0xE67);
 }
 UINT GetPTEntry(UINT PT, UINT16 num)
 {
-    UINT *tmp =(UINT*) ( (REMAPPED_PAGEDIR) | ((PT)<<12) );
+    UINT *tmp =(UINT*) ( (pg_PAGEDIR) | ((PT)<<12) );
     tmp+=num;
     return (*tmp);
 }

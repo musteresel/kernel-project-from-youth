@@ -20,11 +20,11 @@ typedef struct __queue {
 	Task *start;
 	Task *current;
 	INT size;
-}TaskQueue;
+} TaskQueue;
 
 
 
-extern void Multitasking_Init();
+extern void InitMultitasking();
 extern UINT SwitchTask(struct irq_regs *);
 
 #endif
