@@ -8,9 +8,12 @@ SECTIONS
 	.boot :
 	{
 		*(.boot)
+		*(.setup)
+		*(.setup_data)
 	}
+	__EndOfStartupCode = .;
 
-	.text :
+	.text ALIGN(4096):
 	{
 		*(.text)
 	}
@@ -24,11 +27,6 @@ SECTIONS
 	.bss :
 	{
 		*(.bss)
-	}
-	.tasker :
-	{
-		*(.tasker)
-		*(.tasker_data)
 	}
 	__RealStartOfLinkedMemory = ALIGN(4096);
 	. = 0xFFC00000;

@@ -26,7 +26,7 @@ pg_PageTab *linkedDirectory;
 const UINT KPC_START =   0xFFFFD000;
 
 /** Setting up paging **/
-void InitPaging ()
+INTO_SECTION(void InitPaging (),".setup")
 {
 	pg_PageTab *kdir;
 	UINT StartOfLinkedMemory = (UINT)&__StartOfLinkedMemory;

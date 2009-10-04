@@ -22,7 +22,7 @@ By Daniel Oertwig
 
 
 /* startup routine */
-void c_main (UINT eax, UINT* ebx, UINT esp)
+INTO_SECTION(void c_main (UINT eax, UINT* ebx, UINT esp),".setup")
 {
 	UINT memsize_kbytes = 0;
 	UINT *mmap_add;

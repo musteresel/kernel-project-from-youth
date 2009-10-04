@@ -8,9 +8,8 @@
 #include "gdt.h"
 
 /** Global variables **/
-Task *currentTask;
+INTO_SECTION(Task *currentTask,".klinked_data");
 const UINT16 mt_KERNELSTACKSIZE = 0x1000;
-
 
 
 /** Functions used by the taskmanager **/
@@ -49,7 +48,7 @@ Task *CreateTask(UINT eip, UINT cr3)
 
 
 /** Setting up multitasking **/
-void InitMultitasking()
+INTO_SECTION(void InitMultitasking(),".setup")
 {
 	currentTask = (Task*)kalloc(sizeof(Task),0);
 	asm volatile ("mov %%cr3, %0": "=r"(currentTask->cr3));
@@ -60,8 +59,7 @@ void InitMultitasking()
 
 
 /** Code to switch tasks **/
-UINT SwitchTask(struct irq_regs *r) __attribute__ (( section(".klinked")));
-UINT SwitchTask(struct irq_regs *r)
+INTO_SECTION(UINT SwitchTask(struct irq_regs *r),".klinked")
 {
 	currentTask->esp = (UINT)r;
 	currentTask = currentTask->next;

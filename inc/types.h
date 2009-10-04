@@ -3,6 +3,8 @@
 #ifndef __KERNEL__TYPES___HEADER____
 #define __KERNEL__TYPES___HEADER____
 
+/* used to simplify changing section */
+#define INTO_SECTION(obj,sec) obj __attribute__ ((section(sec))); obj
 
 
 /* integers */
