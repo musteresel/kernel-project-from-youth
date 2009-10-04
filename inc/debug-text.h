@@ -11,7 +11,7 @@ extern void puts (INT8*);
 extern void set_color (UINT8, UINT8);
 extern void int_to_string (INT8*, UINT8, INT);
 
-
+#define CheckForSure(val,str) {if(!(val)) { puts("ERROR: ");puts((str));asm volatile("hlt");}}
 
 #endif //(__KERNEL__DEBUGTEXT___HEADER____)
 

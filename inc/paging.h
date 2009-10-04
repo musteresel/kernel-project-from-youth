@@ -26,10 +26,12 @@ typedef struct
 }pg_PageTab;
 
 
-extern const UINT REMAPPED_PAGEDIR;
+extern const UINT pg_PAGEDIR;
+extern const UINT16 pg_PAGEDIRNUM;
+
+extern void InitPaging();
 
 
-extern void Paging_Init ();
 extern INT8 pg_setEntry(pg_PageTab *, UINT, pg_Page);
 extern pg_Page pg_getEntry(pg_PageTab *, UINT);
 
