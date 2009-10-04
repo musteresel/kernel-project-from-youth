@@ -17,9 +17,9 @@ By Daniel Oertwig
 #include "debug-text.h"
 
 /** Markers defined by the linkerscript **/
-extern UINT linked_start;
-extern UINT linked_end;
-extern UINT id_end;
+extern UINT __StartOfLinkedMemory;
+extern UINT __EndOfLinkedMemory;
+extern UINT __RealStartOfLinkedMemory;
 
 /** Global variables **/
 pg_PageTab *linkedDirectory;
@@ -29,9 +29,9 @@ const UINT KPC_START =   0xFFFFD000;
 void InitPaging ()
 {
 	pg_PageTab *kdir;
-	UINT lstart = (UINT)&linked_start;
-	UINT lend = (UINT)&linked_end;
-	UINT real_start = (UINT)&id_end;
+	UINT StartOfLinkedMemory = (UINT)&__StartOfLinkedMemory;
+	UINT EndOfLinkedMemory = (UINT)&__EndOfLinkedMemory;
+	UINT RealStartOfLinkedMemory = (UINT)&__RealStartOfLinkedMemory;
 	UINT pointer;
 
 	pointer = ResolveAddressfromFrame (pmm_alloc_frames(3));
@@ -40,12 +40,12 @@ void InitPaging ()
 
 	/// Create linked directory
 	linkedDirectory = pgoff_CreateRawDir();
-	pgoff_MapMemory(linkedDirectory,lstart,lend,real_start);
+	pgoff_MapMemory(linkedDirectory,StartOfLinkedMemory,EndOfLinkedMemory,RealStartOfLinkedMemory);
 	pgoff_MapMemory(linkedDirectory,KPC_START,0xFFFFFFF0,pointer);
 	
 	/// Create directory used by the kernel
 	kdir = pgoff_CreateRawDir();
-	pgoff_MapMemory(kdir,lstart,lend,real_start);
+	pgoff_MapMemory(kdir,StartOfLinkedMemory,EndOfLinkedMemory,RealStartOfLinkedMemory);
 	pgoff_MapMemory(kdir,KPC_START,0xFFFFFFF0,pointer);
 	pointer = ResolveAddressfromFrame (pmm_alloc_frames(KHEAP_size>>10));
 	CheckForSure(pointer,"Could not allocate space for KHEAP!");

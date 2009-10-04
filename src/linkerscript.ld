@@ -25,14 +25,19 @@ SECTIONS
 	{
 		*(.bss)
 	}
-	id_end = ALIGN(4096);
+	.tasker :
+	{
+		*(.tasker)
+		*(.tasker_data)
+	}
+	__RealStartOfLinkedMemory = ALIGN(4096);
 	. = 0xFFC00000;
-	linked_start = .;
-	.linked : AT (id_end)
+	__StartOfLinkedMemory = .;
+	.linked : AT (__RealStartOfLinkedMemory)
 	{
 		*(.klinked)
 		*(.klinked_data)
 	}
-	linked_end = .;
-	__kernel_end = (linked_end - linked_start)+(id_end);
+	__EndOfLinkedMemory = .;
+	__kernel_end = (__EndOfLinkedMemory - __StartOfLinkedMemory)+(__RealStartOfLinkedMemory);
 }
