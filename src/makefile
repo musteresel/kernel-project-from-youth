@@ -29,6 +29,7 @@ builddirs:
 	@mkdir -p ../build/text
 	@mkdir -p ../build/heap
 	@mkdir -p ../build/multitasking
+	@mkdir -p ../build/communication
 	
 
 
